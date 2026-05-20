@@ -53,12 +53,3 @@ func CommandExistsInContainer(container string, command string) {
 		os.Exit(1)
 	}
 }
-
-func CommandExistsInContainerCheck(container string, command string) bool {
-	cmd := exec.Command("docker", "exec", container, "sh", "-c", "command -v "+command)
-	err := cmd.Run()
-	if err != nil {
-		return false
-	}
-	return true
-}
