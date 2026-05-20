@@ -68,7 +68,7 @@ func updateSingle() {
 			fmt.Println("Continuing without updating.")
 		}
 	case "go":
-		cmd := `go install -ldflags "-X ` + config.GithubUrl + `/config.BuildMethod=go" ` + config.GithubUrl + `@latest`
+		cmd := `go install -ldflags "-X ` + config.ModulePath + `/config.BuildMethod=go" ` + config.ModulePath + `@latest`
 
 		fmt.Println(ui.Green("Installed via go"))
 		fmt.Println("Please update with the follwing commands")

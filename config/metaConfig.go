@@ -16,7 +16,8 @@ var Version string = sys.GetCurrentVersion()
 var BuildMethod string = "source"
 
 // Github Repo
-var GithubUrl string = "https://github.com/mattia37773/mt"
+var ModulePath string = "github.com/mattia37773/mt"
+var GithubUrl string = "https://" + ModulePath
 var GithubBaseApi string = "https://api.github.com/repos/mattia37773/mt"
 
 func GetNewestVersion() string {
