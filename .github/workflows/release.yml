@@ -1,0 +1,42 @@
+name: Release
+run-name: Release ${{ github.ref_name }} - Build
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.4"
+
+      - name: Run GoReleaser
+        id: run-goreleaser
+        uses: goreleaser/goreleaser-action@v5
+        with:
+          version: "~> v2"
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rollback on Failure
+        if: failure() && steps.run-goreleaser.outcome == 'failure'
+        run: |
+          echo "Build failed. Starting rollback for tag ${{ github.ref_name }}..."
+          git push --delete origin ${{ github.ref_name }}
+          git tag -d ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

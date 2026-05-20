@@ -1,0 +1,52 @@
+name: vhs
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
+
+jobs:
+  vhs:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with: 
+          ref: main
+          fetch-depth: 0
+
+      - name: Install VHS & Dependencies
+        run: |
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/charm.gpg
+          echo "deb [signed-by=/etc/apt/keyrings/charm.gpg] https://repo.charm.sh/apt/ * *" | sudo tee /etc/apt/sources.list.d/charm.list
+          sudo apt-get update && sudo apt-get install -y vhs ffmpeg ttyd
+
+      - name: Download and Extract latest release binary
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p ./bin
+          # downloads the latest binary
+          gh release download --pattern "*linux*amd64*" --dir ./bin || \
+          gh release download --pattern "*Linux*x86_64*" --dir ./bin
+          
+          cd bin
+          find . -name "*.tar.gz" -exec tar -xzf {} \;
+          find . -name "*.zip" -exec unzip -o {} \;
+          
+          find . -type f -executable -exec mv {} . \;
+          chmod +x *
+          echo "$(pwd)" >> $GITHUB_PATH
+
+      - name: Generate VHS GIF
+        run: vhs assets/mt.tape
+        
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update generated VHS GIF [skip ci]"
+          file_pattern: 'assets/*.gif'

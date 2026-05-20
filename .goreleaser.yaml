@@ -1,0 +1,64 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: .
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - arm64
+      - amd64
+    ldflags:
+      - -s -w
+      - -X github.com/mattia37773/mt/config.BuildMethod=github
+
+
+archives:
+  - formats: [tar.gz]
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+changelog:
+  sort: asc
+  groups:
+    - title: "Features"
+      regexp: "^feat"
+    - title: "Bug Fixes"
+      regexp: "^fix"
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^typo:"
+
+checksum:
+  name_template: "checksums.txt"
+
+release:
+  name_template: "{{ .Tag }}"
+  header: |
+
+    -
+
+  footer: |
+    ---
+
+    Released by GoReleaser
