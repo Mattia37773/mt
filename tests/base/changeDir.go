@@ -4,16 +4,20 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/mattia37773/mt/config"
 )
 
 func ChangeDirToDefault(t *testing.T) {
 	dir := rootDir([]string{"tests", "projects", "default"})
 	t.Chdir(dir)
+	config.ParseConfigFile()
 }
 
 func ChangeDirToSymfony(t *testing.T) {
 	dir := rootDir([]string{"tests", "projects", "symfony"})
 	t.Chdir(dir)
+	config.ParseConfigFile()
 }
 
 func rootDir(projectFilepaths []string) string {

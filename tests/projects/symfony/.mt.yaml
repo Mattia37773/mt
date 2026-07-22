@@ -3,18 +3,19 @@
 # =============================================================================
 
 # Docker Compose Project Configuration
-projectCompose:
-    # paths relative to project root
-    paths:
-        dockerCompose: docker/docker-compose-dev.yaml
-        env: docker/.env
-    db:
-        containerName: "db"
-        type: "mysql"
-        name: "appDb"
-        password: "password"
-        user: "uDb"
-    backend:
-        containerName: fpm
-    frontend:
-        containerName: fpm
+#projectCompose:
+# paths relative to project root
+projectName: codesnippets
+paths:
+    dockerCompose: docker/docker-compose-dev.yaml
+    env: docker/.env
+db:
+    containerName: "db"
+    provider: "mysql"
+    name: "appDb"
+    password: ${MYSQL_PASSWORD}
+    user: "uDb"
+backend:
+    containerName: fpm
+frontend:
+    containerName: fpm

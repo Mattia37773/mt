@@ -19,19 +19,23 @@ func init() {
 }
 
 func helpCommandNotFound() {
+
 	cmd.RootCmd.SetHelpCommand(&cobra.Command{
 		Use:   "help [command]",
 		Short: "Shows the help text for an command",
 		Run: func(c *cobra.Command, args []string) {
+			out := c.OutOrStdout()
 			if len(args) > 0 {
 				foundCmd, _, err := cmd.RootCmd.Find(args)
 				if err != nil || foundCmd == nil {
-					fmt.Print(text.Red("Error: "))
-					fmt.Printf("unknown command \"%s\" for \"mt\"", args[0])
-					fmt.Println()
-					fmt.Println(text.GlowPink("Try mt --help"))
+					fmt.Fprint(out, text.Red("Error: "))
+					fmt.Fprintf(out, "unknown command \"%s\" for \"mt\"", args[0])
+					fmt.Fprint(out)
+					fmt.Fprintln(out, text.GlowPink("Try mt --help"))
 					return
 				}
+				// foundCmd.SetOut(out)
+				// foundCmd.SetErr(out)
 				foundCmd.Help()
 				return
 			}
@@ -40,53 +44,54 @@ func helpCommandNotFound() {
 }
 
 func helpStyle() {
-	cmd.RootCmd.SetHelpFunc(func(cmd *cobra.Command, args []string) {
-		fmt.Print(text.GlowPink("Usage: "))
-		fmt.Println(text.GlowPurple(cmd.UseLine()))
+	cmd.RootCmd.SetHelpFunc(func(c *cobra.Command, args []string) {
+		out := c.OutOrStdout()
+
+		fmt.Fprintln(out, text.GlowPink("Usage: ")+text.GlowPurple(c.UseLine()))
 
 		visibleCommands := 0
-		for _, c := range cmd.Commands() {
-			if !c.Hidden {
+		for _, sub := range c.Commands() {
+			if !sub.Hidden {
 				visibleCommands++
 			}
 		}
 
-		if cmd.Short != "" {
-			fmt.Println()
-			fmt.Println(text.GlowPink(cmd.Short))
+		if c.Short != "" {
+			fmt.Fprintln(out)
+			fmt.Fprintln(out, text.GlowPink(c.Short))
 		}
 
 		if visibleCommands > 0 {
-			fmt.Println()
-			fmt.Println(text.GlowPink(text.Bold("Commands:")))
+			fmt.Fprintln(out)
+			fmt.Fprintln(out, text.GlowPink(text.Bold("Commands:")))
 
 			maxLen := 0
-			for _, c := range cmd.Commands() {
-				if !c.Hidden {
-					if len(c.Name()) > maxLen {
-						maxLen = len(c.Name())
+			for _, sub := range c.Commands() {
+				if !sub.Hidden {
+					if len(sub.Name()) > maxLen {
+						maxLen = len(sub.Name())
 					}
 				}
 			}
 
-			for _, c := range cmd.Commands() {
-				if !c.Hidden {
-					name := text.Purple(c.Name())
-					padding := strings.Repeat(" ", maxLen-len(c.Name()))
+			for _, sub := range c.Commands() {
+				if !sub.Hidden {
+					name := text.Purple(sub.Name())
+					padding := strings.Repeat(" ", maxLen-len(sub.Name()))
 
-					fmt.Printf("  %s%s  %s\n",
+					fmt.Fprintf(out, "  %s%s  %s\n",
 						name,
 						padding,
-						c.Short,
+						sub.Short,
 					)
 				}
 			}
 		}
 
-		if len(cmd.Flags().FlagUsages()) > 0 {
-			fmt.Println()
-			fmt.Println(text.GlowPink("Flags:"))
-			fmt.Print(text.Lime(cmd.Flags().FlagUsages()))
+		if len(c.Flags().FlagUsages()) > 0 {
+			fmt.Fprintln(out)
+			fmt.Fprintln(out, text.GlowPink("Flags:"))
+			fmt.Fprint(out, text.Lime(c.Flags().FlagUsages()))
 		}
 	})
 }

@@ -14,6 +14,8 @@ import (
 var exitFunc = os.Exit
 
 type ConfigStruct struct {
+	ProjectName string `yaml:"projectName"`
+
 	Paths struct {
 		DockerCompose string `yaml:"dockerCompose"`
 		Env           string `yaml:"env"`

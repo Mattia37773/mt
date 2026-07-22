@@ -26,8 +26,6 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	// gets the config data into a strucht
-	config.ParseConfigFile()
 	// error message for a not found command
 	err := RootCmd.Execute()
 	if err != nil {
@@ -38,6 +36,11 @@ func Execute() {
 }
 
 func init() {
+	if config.Environment != "test" {
+		// load the project config
+		config.ParseConfigFile()
+	}
+
 	versionStyle(RootCmd)
 	RootCmd.Version = config.AppConfig.Version
 
@@ -78,10 +81,7 @@ func errorMessage(err error) {
 }
 
 func showUpdateMessage(version string) {
-	fmt.Println(config.Version)
-	fmt.Println(config.AppConfig.Version)
-	latestVersion := config.GetNewestCliVersionFunction(version)
-	fmt.Println(latestVersion)
+	latestVersion := config.LatestVersion
 	if version < latestVersion {
 		if version != "dev" {
 			lines := []string{

@@ -5,10 +5,10 @@
 # Docker Compose Project Configuration
 #projectCompose:
 # paths relative to project root
+projectName: bp
 paths:
   dockerCompose: docker/docker-compose.yaml
   env: .env
-
 db:
   containerName: "db"
   provider: "mysql"

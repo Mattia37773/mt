@@ -11,8 +11,10 @@ import (
 )
 
 var (
-	Version     = "dev"
-	BuildMethod = "source"
+	Version       = "dev"
+	BuildMethod   = "source"
+	LatestVersion = getNewestCliVersionFunction(AppConfig.Version)
+	Environment   = "dev"
 )
 
 var AppConfig = struct {
@@ -38,7 +40,7 @@ var AppConfig = struct {
 `,
 }
 
-func GetNewestCliVersionFunction(currentVersion string) string {
+func getNewestCliVersionFunction(currentVersion string) string {
 	response, err := http.Get(AppConfig.GithubBaseApi + "/releases/latest")
 
 	// Needed for an error if the
@@ -62,7 +64,6 @@ func GetNewestCliVersionFunction(currentVersion string) string {
 		defer file.Close()
 		file.WriteString(latestVersion)
 
-		return "1.0.5"
 		return latestVersion
 	} else {
 		_, err := os.Stat(dir + "mt-version")
@@ -71,7 +72,6 @@ func GetNewestCliVersionFunction(currentVersion string) string {
 			return string(fileversion)
 		}
 
-		return "1.0.5"
 		return currentVersion
 	}
 }
