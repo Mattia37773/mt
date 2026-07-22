@@ -1,0 +1,41 @@
+<div {{ attributes }} data-turbo="false" class="ms-5 me-5">
+
+    <div class="max-w-md mx-auto mt-30 ">
+        <label class="flex items-center w-full border-2 border-gray-200 rounded-lg p-2">
+            <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </g>
+            </svg>
+            <input type="search" data-model="name" placeholder="Suche" class="mx-2 w-full ">
+        </label>
+    </div>
+
+
+    <div class=" mt-10 mb-20 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {% for snippet in this.results %}
+            <div class="card bg-base-100 w-96 shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        {{ snippet.name }}
+    {#                    <div class="badge badge-secondary">NEW</div>#}
+                    </h2>
+                    <div class="mt-4  card-actions justify-center">
+                        <a
+                            href="{{ path('app_snippet_show', {'slug': snippet.slug}) }}"
+                            class="btn btn-primary"
+                        >Anzeigen
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+            <div class="col-span-full rounded-lg border border-dashed border-gray-300 p-8 text-center text-gray-500">
+                Keine Snippets gefunden
+            </div>
+        {% endfor %}
+    </div>
+
+</div>

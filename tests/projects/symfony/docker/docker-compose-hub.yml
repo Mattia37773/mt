@@ -1,0 +1,82 @@
+name: ${PROJECT_NAME}
+services:
+    fpm:
+        container_name: ${PROJECT_NAME}-fpm
+        image:  mattttiaaa/${PROJECT_NAME}-fpm:1.1
+        volumes:
+        - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+        depends_on:
+        - db
+        environment:
+            - APP_ENV=dev
+            # Error & Debugging
+            - PHP_DISPLAY_ERRORS=on
+            - APP_DEBUG=true
+        ports:
+        - "9000:9000"
+        networks:
+        - app-network
+
+    nginx:
+        container_name: ${PROJECT_NAME}-nginx
+        image: nginx:1-alpine
+        ports:
+            - "8080:80"
+        volumes:
+            - ./nginx-conf:/etc/nginx/conf.d
+            - ../:/app
+        depends_on:
+            - fpm
+        networks:
+            - app-network
+
+    db:
+        container_name: ${PROJECT_NAME}-db
+        image: mysql:8.4
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: appDb
+            MYSQL_USER: uDb
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        ports:
+            - "3306:3306"
+        volumes:
+            - db-data:/var/lib/mysql
+        networks:
+            - app-network
+
+    phpmyadmin:
+        container_name: ${PROJECT_NAME}-phpmyadmin
+        image: phpmyadmin:latest
+        environment:
+            PMA_HOST: db
+            PMA_USER: uDb
+            PMA_PASSWORD: ${PMA_PASSWORD}
+            UPLOAD_LIMIT: 100M
+        depends_on:
+            - db
+        ports:
+            - "8081:80"
+        networks:
+            - app-network
+
+    mailpit:
+        container_name: ${PROJECT_NAME}-mailpit
+        image: axllent/mailpit:latest
+        ports:
+            - "8025:8025"
+            - "1025:1025"
+        restart: unless-stopped
+        environment:
+            - MP_MAX_MESSAGES=500
+            - MP_SMTP_AUTH_ALLOW_INSECURE=true
+        networks:
+            - app-network
+
+volumes:
+    db-data:
+
+networks:
+     app-network:
+        driver: bridge

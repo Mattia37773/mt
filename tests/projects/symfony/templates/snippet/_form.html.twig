@@ -1,0 +1,70 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6 max-w-2xl mx-auto bg-base-100 p-6 sm:p-8 rounded-2xl shadow-sm border border-base-200'}}) }}
+
+    {# Snippet Titel (Name) #}
+    <div class="form-control w-full">
+        <label class="label" for="{{ form.name.vars.id }}">
+            <span class="label-text font-semibold text-base-content">{{ form.name.vars.label }}</span>
+        </label>
+        {{ form_widget(form.name, {
+            'attr': {
+                'class': 'input input-bordered w-full focus:input-primary transition-all duration-200',
+                'placeholder': 'z.B. Eloquent Query beschleunigen'
+            }
+        }) }}
+        {% if form_errors(form.name) %}
+            <label class="label">
+                <span class="label-text-alt text-error">{{ form_errors(form.name) }}</span>
+            </label>
+        {% endif %}
+    </div>
+
+    {# Code-Bereich #}
+    <div class="form-control w-full">
+        <label class="label" for="{{ form.code.vars.id }}">
+            <span class="label-text font-semibold text-base-content">{{ form.code.vars.label }}</span>
+        </label>
+        {{ form_widget(form.code, {
+            'attr': {
+                'class': 'textarea textarea-bordered w-full font-mono focus:textarea-primary transition-all duration-200 resize-y',
+                'placeholder': 'Füge hier deinen Code ein...',
+                'rows': '12'
+            }
+        }) }}
+        {% if form_errors(form.code) %}
+            <label class="label">
+                <span class="label-text-alt text-error">{{ form_errors(form.code) }}</span>
+            </label>
+        {% endif %}
+    </div>
+
+    {# Kategorien (Multiselect) #}
+    <div class="form-control w-full">
+        <label class="label" for="{{ form.categories.vars.id }}">
+            <span class="label-text font-semibold text-base-content">{{ form.categories.vars.label }}</span>
+            <span class="label-text-alt text-base-content/50">Halte Strg/Cmd gedrückt für Mehrfachauswahl</span>
+        </label>
+        {{ form_widget(form.categories, {
+            'attr': {
+                'class': 'select select-bordered w-full h-36 focus:select-primary transition-all duration-200',
+            }
+        }) }}
+        {% if form_errors(form.categories) %}
+            <label class="label">
+                <span class="label-text-alt text-error">{{ form_errors(form.categories) }}</span>
+            </label>
+        {% endif %}
+    </div>
+
+    {# Formular-Aktionen (Buttons) #}
+    <div class="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-base-200">
+        <a href="{{ path('app_snippet_index') }}" class="btn btn-ghost order-2 sm:order-1">
+            Abbrechen
+        </a>
+        <button type="submit" class="btn btn-primary order-1 sm:order-2 px-8">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 mr-1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            {{ button_label|default('Snippet speichern') }}
+        </button>
+    </div>
+{{ form_end(form) }}

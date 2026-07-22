@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Snippet index{% endblock %}
+
+{% block body %}
+    <div class="navbar bg-base-300 w-full">
+        <div class="mx-2 flex-1 px-2">Code Snippets</div>
+        <div class="hidden flex-none lg:block">
+            <ul class="menu menu-horizontal ">
+                <li><a href="{{ 'create' }}" class="btn btn-primary">Create Snippet</a></li>
+                <li><a href="{{ 'login' }}" class="btn">Login</a></li>
+                <li><a href="{{ 'register' }}" class="btn">Register</a></li>
+            </ul>
+        </div>
+    </div>
+
+    {{ component("SnippetsIndex") }}
+
+{% endblock %}

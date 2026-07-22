@@ -1,0 +1,20 @@
+# =============================================================================
+# MT CLI Tool Configuration
+# =============================================================================
+
+# Docker Compose Project Configuration
+projectCompose:
+    # paths relative to project root
+    paths:
+        dockerCompose: docker/docker-compose-dev.yaml
+        env: docker/.env
+    db:
+        containerName: "db"
+        type: "mysql"
+        name: "appDb"
+        password: "password"
+        user: "uDb"
+    backend:
+        containerName: fpm
+    frontend:
+        containerName: fpm

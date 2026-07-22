@@ -1,0 +1,51 @@
+{
+    "name": "Code Snippets",
+    "dockerComposeFile": "../docker/docker-compose-dev.yaml",
+    "shutdownAction": "stopCompose",
+    "service": "fpm",
+    "remoteUser": "root",
+    "workspaceFolder": "/app",
+    "overrideCommand": false,
+    "updateRemoteUserUID": true,
+    "updateContentCommand": "npm install && composer install --no-interaction",
+    "postCreateCommand": "npm run build && echo '' && echo 'Migrate the database structure with this command now: php bin/console doctrine:migrations:migrate -n' && echo '' && echo 'Load sample fixture data with this command: php bin/console doctrine:fixtures:load -n' && echo ''  && echo 'Start the hmr for the frontend with this command: npm run dev' ",
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind",
+        "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind"
+    ],
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {}
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "php-cs-fixer.executablePath": "/app/vendor/bin/php-cs-fixer",
+                "php-cs-fixer.onsave": true,
+                "php-cs-fixer.config": ".php-cs-fixer.dist.php;",
+                "sqltools.connections": [
+                    {
+                        "name": "App Db",
+                        "driver": "MySQL",
+                        "server": "db",
+                        "port": 3306,
+                        "database": "appDb",
+                        "username": "uDb"
+                    }
+                ]
+            },
+            "extensions": [
+                "xdebug.php-debug",
+                "DEVSENSE.composer-php-vscode",
+                "DEVSENSE.phptools-vscode",
+                "TheNouillet.symfony-vscode",
+                "mblode.twig-language",
+                "bradlc.vscode-tailwindcss",
+                "mtxr.sqltools-driver-mysql",
+                "mtxr.sqltools",
+                "EditorConfig.EditorConfig",
+                "junstyle.php-cs-fixer"
+            ]
+        }
+    }
+}
