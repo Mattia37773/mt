@@ -15,30 +15,30 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var BuildCmd = &cobra.Command{
-	Use:                   "build",
-	Short:                 "Build the Docker stack",
+var StartCmd = &cobra.Command{
+	Use:                   "start",
+	Short:                 "Start the docker stack",
 	GroupID:               "stack",
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		buildStack(c.OutOrStdout())
+		startStack(c.OutOrStdout())
 	},
 }
 
 func init() {
-	StackCmd.AddCommand(BuildCmd)
+	StackCmd.AddCommand(StartCmd)
 }
 
-func buildStack(out io.Writer) {
+func startStack(out io.Writer) {
 	// todo add valdation for those two
 	var projectName string = config.ProjectConfig.ProjectName
 	var dockerPath string = config.ProjectConfig.Paths.DockerCompose
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
-	fmt.Fprintln(out, "Building the docker stack")
+	fmt.Fprintln(out, "Starting the docker stack")
 
-	cmd := exec.Command("docker", "compose", "-f", dockerPath, "build", "--no-cache")
+	cmd := exec.Command("docker", "compose", "-f", dockerPath, "up", "-d")
 	err := shell.ExecuteCommand(cmd)
 	if err != nil {
 		fmt.Fprint(out, text.Red("Something went wrong: "))
@@ -46,5 +46,5 @@ func buildStack(out io.Writer) {
 		os.Exit(1)
 	}
 
-	fmt.Fprintln(out, text.Green("Successfully built the stack"))
+	fmt.Fprintln(out, text.Green("Successfully started the stack"))
 }

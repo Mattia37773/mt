@@ -5,16 +5,22 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
-	"github.com/mattia37773/mt/ui/text"
 )
 
-func ExecuteCommand(cmd *exec.Cmd) {
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
+func ExecuteCommand(cmd *exec.Cmd) error {
+	// Nur auf os.Stdout / os.Stderr setzen, falls noch kein Writer zugewiesen wurde!
+	if cmd.Stdout == nil {
+		cmd.Stdout = os.Stdout
+	}
+	if cmd.Stderr == nil {
+		cmd.Stderr = os.Stderr
+	}
+	if cmd.Stdin == nil {
+		cmd.Stdin = os.Stdin
+	}
 
 	if err := cmd.Start(); err != nil {
+		return err // Fehler beim Starten direkt zurückgeben
 	}
 
 	sigChan := make(chan os.Signal, 1)
@@ -22,85 +28,38 @@ func ExecuteCommand(cmd *exec.Cmd) {
 	go func() {
 		<-sigChan
 		if cmd.Process != nil {
-			cmd.Process.Signal(os.Interrupt)
+			_ = cmd.Process.Signal(os.Interrupt)
 		}
 	}()
 
 	if err := cmd.Wait(); err != nil {
-		fmt.Printf(text.Red("Error: %s\n"), err)
-		os.Exit(1)
-	}
-
-}
-
-func ExecuteCommandReturn(cmd *exec.Cmd) (bool, error) {
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
-	if err := cmd.Start(); err != nil {
-	}
-
-	sigChan := make(chan os.Signal, 1)
-
-	go func() {
-		<-sigChan
-		if cmd.Process != nil {
-			cmd.Process.Signal(os.Interrupt)
-		}
-	}()
-
-	if err := cmd.Wait(); err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func ExecuteCommandOnlyErrors(cmd *exec.Cmd) {
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-
-	if err != nil {
-		fmt.Println()
-
-		if stderr.Len() > 0 {
-			fmt.Println("Error:", stderr.String())
-		}
-		if out.Len() > 0 {
-			fmt.Println("Output:", out.String())
-		}
-
-		os.Exit(1)
-	}
-}
-
-func ExecuteCommandOnlyErrorsReturn(cmd *exec.Cmd) error {
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-
-	if err != nil {
-		fmt.Println()
-
-		if stderr.Len() > 0 {
-			fmt.Println("Error:", stderr.String())
-		}
-		if out.Len() > 0 {
-			fmt.Println("Output:", out.String())
-		}
-
 		return err
 	}
-
 	return nil
+}
+
+func ExecuteCommandReturn(cmd *exec.Cmd) (string, error) {
+	var stdoutBuf, stderrBuf bytes.Buffer
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
+	cmd.Stdin = os.Stdin
+
+	if err := cmd.Start(); err != nil {
+		return "", err
+	}
+
+	sigChan := make(chan os.Signal, 1)
+
+	go func() {
+		<-sigChan
+		if cmd.Process != nil {
+			_ = cmd.Process.Signal(os.Interrupt)
+		}
+	}()
+
+	if err := cmd.Wait(); err != nil {
+		return "", fmt.Errorf("command execution failed: %w (stderr: %s)", err, stderrBuf.String())
+	}
+
+	return stdoutBuf.String(), nil
 }

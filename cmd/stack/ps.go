@@ -15,36 +15,40 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var BuildCmd = &cobra.Command{
-	Use:                   "build",
-	Short:                 "Build the Docker stack",
+var psCmd = &cobra.Command{
+	Use:                   "ps",
+	Short:                 "Show stack status",
 	GroupID:               "stack",
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		buildStack(c.OutOrStdout())
+		psStack(c.OutOrStdout())
 	},
 }
 
 func init() {
-	StackCmd.AddCommand(BuildCmd)
+	StackCmd.AddCommand(psCmd)
 }
 
-func buildStack(out io.Writer) {
+func psStack(out io.Writer) {
 	// todo add valdation for those two
 	var projectName string = config.ProjectConfig.ProjectName
 	var dockerPath string = config.ProjectConfig.Paths.DockerCompose
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
-	fmt.Fprintln(out, "Building the docker stack")
+	fmt.Fprintln(out, "Stack Status")
 
-	cmd := exec.Command("docker", "compose", "-f", dockerPath, "build", "--no-cache")
+	cmd := exec.Command("docker", "compose", "-f", dockerPath, "ps")
+
+	// Leite Stdout & Stderr an den 'out' Writer um
+	cmd.Stdout = out
+	cmd.Stderr = out
+
+	// ExecuteCommand sieht nun: cmd.Stdout ist NICHT nil, und lässt es unberührt!
 	err := shell.ExecuteCommand(cmd)
 	if err != nil {
 		fmt.Fprint(out, text.Red("Something went wrong: "))
 		fmt.Fprintln(out, err)
 		os.Exit(1)
 	}
-
-	fmt.Fprintln(out, text.Green("Successfully built the stack"))
 }

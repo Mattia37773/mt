@@ -7,7 +7,7 @@
 # paths relative to project root
 projectName: codesnippets
 paths:
-    dockerCompose: docker/docker-compose-dev.yaml
+    dockerCompose: docker/docker-compose.yaml
     env: docker/.env
 db:
     containerName: "db"
