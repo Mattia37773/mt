@@ -1,6 +1,5 @@
-package config
+package config // TODO add tests
 
-// TODO add tests
 import (
 	"fmt"
 	"os"
@@ -12,7 +11,7 @@ import (
 	"github.com/mattia37773/mt/ui/text"
 )
 
-var exitFunc = os.Exit // Standardmäßig das echte os.Exit
+var exitFunc = os.Exit
 
 type ConfigStruct struct {
 	Paths struct {
@@ -61,14 +60,14 @@ func ParseConfigFile() {
 	expandedData, err := expandEnvVarsStrict(string(data))
 	if err != nil {
 		fmt.Printf(text.Red("%v\n"), err)
-		os.Exit(1)
+		exitFunc(1)
 	}
 
 	// resolve to struct
 	if err := yaml.Unmarshal([]byte(expandedData), &ProjectConfig); err != nil {
 		fmt.Println(text.Red("Error with parsing the config file '.mt.yaml': "))
 		fmt.Printf("%v\n", err)
-		os.Exit(1)
+		exitFunc(1)
 	}
 }
 

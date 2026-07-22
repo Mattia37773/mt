@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/mattia37773/mt/config"
+	"github.com/mattia37773/mt/ui"
 	"github.com/mattia37773/mt/ui/text"
 	"github.com/spf13/cobra"
 )
@@ -37,22 +38,20 @@ func Execute() {
 }
 
 func init() {
-	fmt.Println(config.AppConfig.Version)
-	os.Exit(1)
 	versionStyle(RootCmd)
 	RootCmd.Version = config.AppConfig.Version
 
 	// When the command is update
 	// the message shouldn't show up
-	// if len(os.Args) == 2 {
-	// 	arg := os.Args[1:]
-	// 	argName := strings.Join(arg, "")
-	// 	if argName != "update" {
-	// 		sys.ShowUpdateMessage(config.AppConfig.Version, config.AppConfig.GithubBaseApi)
-	// 	}
-	// } else {
-	// 	sys.ShowUpdateMessage(config.AppConfig.Version, config.AppConfig.GithubBaseApi)
-	// }
+	if len(os.Args) == 2 {
+		arg := os.Args[1:]
+		argName := strings.Join(arg, "")
+		if argName != "update" {
+			showUpdateMessage(config.AppConfig.Version)
+		}
+	} else {
+		showUpdateMessage(config.AppConfig.Version)
+	}
 }
 
 func versionStyle(cmd *cobra.Command) {
@@ -76,4 +75,21 @@ func errorMessage(err error) {
 
 	fmt.Println(text.GlowPink("Try mt --help for usage."))
 	os.Exit(1)
+}
+
+func showUpdateMessage(version string) {
+	fmt.Println(config.Version)
+	fmt.Println(config.AppConfig.Version)
+	latestVersion := config.GetNewestCliVersionFunction(version)
+	fmt.Println(latestVersion)
+	if version < latestVersion {
+		if version != "dev" {
+			lines := []string{
+				"A new update is available",
+				"Current Version: " + config.AppConfig.Version,
+				"Latest  Version: " + latestVersion,
+			}
+			ui.Border(lines)
+		}
+	}
 }

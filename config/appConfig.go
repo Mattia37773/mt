@@ -1,12 +1,18 @@
 /*
 Copyright © 2026 Matze
 */
-// add tests
 package config
 
 import (
-	"runtime/debug"
-	"strings"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"os"
+)
+
+var (
+	Version     = "dev"
+	BuildMethod = "source"
 )
 
 var AppConfig = struct {
@@ -17,8 +23,8 @@ var AppConfig = struct {
 	GithubBaseApi string
 	Logo          string
 }{
-	Version:       getCurrentVersion(), //  TODO get versin somewhgere sys.GetCurrentVersion()
-	BuildMethod:   "source",            // TODO override during buildtome
+	Version:       Version,
+	BuildMethod:   BuildMethod,
 	ModulePath:    "github.com/mattia37773/mt",
 	GithubUrl:     "https://github.com/mattia37773/mt",
 	GithubBaseApi: "https://api.github.com/repos/mattia37773/mt",
@@ -32,14 +38,40 @@ var AppConfig = struct {
 `,
 }
 
-func getCurrentVersion() string {
+func GetNewestCliVersionFunction(currentVersion string) string {
+	response, err := http.Get(AppConfig.GithubBaseApi + "/releases/latest")
 
-	info, ok := debug.ReadBuildInfo()
-	if !ok {
-		return "dev"
+	// Needed for an error if the
+	// device isn't connected with internet
+	if err != nil {
+		return currentVersion
 	}
-	v := info.Main.Version
-	v = strings.Split(v, "+")[0]
 
-	return v
+	dir := os.TempDir()
+
+	// The github api has harsh rate limiting
+	// it returns nil when that limit is hit
+	// So nothing gets printed when the limit is reached
+	if response == nil || response.StatusCode != 403 {
+		var data map[string]interface{}
+		json.NewDecoder(response.Body).Decode(&data)
+		latestVersion, _ := data["tag_name"].(string)
+
+		// Write the newest version to a file
+		file, _ := os.Create(dir + "mt-version")
+		defer file.Close()
+		file.WriteString(latestVersion)
+
+		return "1.0.5"
+		return latestVersion
+	} else {
+		_, err := os.Stat(dir + "mt-version")
+		if !errors.Is(err, os.ErrNotExist) {
+			fileversion, _ := os.ReadFile(dir + "mt-version")
+			return string(fileversion)
+		}
+
+		return "1.0.5"
+		return currentVersion
+	}
 }

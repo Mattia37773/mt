@@ -22,5 +22,5 @@ func TestVersion(t *testing.T) {
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
-	assert.Contains(t, cleanOutput, "mt version 1.0.0")
+	assert.Contains(t, cleanOutput, "mt version dev")
 }
