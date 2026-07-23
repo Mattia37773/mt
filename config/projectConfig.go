@@ -1,4 +1,4 @@
-package config // TODO add tests
+package config
 
 import (
 	"fmt"
@@ -36,6 +36,10 @@ type ConfigStruct struct {
 	Frontend struct {
 		ContainerName string `yaml:"containerName"`
 	} `yaml:"frontend"`
+
+	Main struct {
+		ContainerName string `yaml:"containerName"`
+	} `yaml:"main"`
 }
 
 var ProjectConfig ConfigStruct
@@ -45,9 +49,7 @@ func ParseConfigFile() {
 	data, err := os.ReadFile(".mt.yaml")
 
 	if err != nil {
-		fmt.Print(text.Red("Error with opening '.mt.yaml':\n"))
-		fmt.Printf("%v\n", err)
-		exitFunc(1)
+		return
 	}
 
 	envFile := getEnvFile(data)

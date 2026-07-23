@@ -44,7 +44,7 @@ func TestHelpStyle(t *testing.T) {
 		Use:   "completion",
 		Short: "Generate the autocompletion script for the specified shell",
 	})
-	RootCmd.AddCommand(configCmd)
+	RootCmd.AddCommand(shellCmd)
 	RootCmd.AddCommand(&cobra.Command{
 		Use:   "help",
 		Short: "Shows the help text for an command",
@@ -63,8 +63,8 @@ func TestHelpStyle(t *testing.T) {
 	assert.Contains(t, cleanOutput, "Commands:")
 	assert.Contains(t, cleanOutput, "completion")
 	assert.Contains(t, cleanOutput, "Generate the autocompletion script for the specified shell")
-	assert.Contains(t, cleanOutput, "config")
-	assert.Contains(t, cleanOutput, "This command generates a config file for this project")
+	assert.Contains(t, cleanOutput, "shell")
+	assert.Contains(t, cleanOutput, "Open a shell in a container")
 	assert.Contains(t, cleanOutput, "help")
 	assert.Contains(t, cleanOutput, "Shows the help text for an command")
 	assert.Contains(t, cleanOutput, "Flags:")

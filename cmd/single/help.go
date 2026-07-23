@@ -30,7 +30,7 @@ func helpCommandNotFound() {
 				if err != nil || foundCmd == nil {
 					fmt.Fprint(out, text.Red("Error: "))
 					fmt.Fprintf(out, "unknown command \"%s\" for \"mt\"", args[0])
-					fmt.Fprint(out)
+					fmt.Fprintln(out)
 					fmt.Fprintln(out, text.GlowPink("Try mt --help"))
 					return
 				}

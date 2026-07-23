@@ -63,3 +63,27 @@ func ExecuteCommandReturn(cmd *exec.Cmd) (string, error) {
 
 	return stdoutBuf.String(), nil
 }
+
+func ExecuteCommandOnlyErrors(cmd *exec.Cmd) {
+	var stderrBuf bytes.Buffer
+	var out bytes.Buffer
+
+	cmd.Stdout = &out
+	cmd.Stderr = &stderrBuf
+	cmd.Stdin = os.Stdin
+
+	err := cmd.Run()
+
+	if err != nil {
+		fmt.Println()
+
+		if stderrBuf.Len() > 0 {
+			fmt.Println("Error:", stderrBuf.String())
+		}
+		if out.Len() > 0 {
+			fmt.Println("Output:", out.String())
+		}
+
+		os.Exit(1)
+	}
+}

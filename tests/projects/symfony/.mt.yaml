@@ -13,9 +13,11 @@ db:
     containerName: "db"
     provider: "mysql"
     name: "appDb"
-    password: ${MYSQL_PASSWORD}
-    user: "uDb"
+    password: ${MYSQL_ROOT_PASSWORD}
+    user: "root" # "uDb"
 backend:
     containerName: fpm
 frontend:
+    containerName: fpm
+main:
     containerName: fpm

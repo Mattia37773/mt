@@ -1,0 +1,271 @@
+package e2e
+
+// change to full test suite
+import (
+	"bytes"
+	"os"
+	"testing"
+
+	"github.com/mattia37773/mt/cmd"
+	_ "github.com/mattia37773/mt/cmd/db"
+	_ "github.com/mattia37773/mt/cmd/php"
+	_ "github.com/mattia37773/mt/cmd/stack"
+	"github.com/mattia37773/mt/config"
+	"github.com/mattia37773/mt/tests/base"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestSingles(t *testing.T) {
+	t.Run("Start", func(t *testing.T) {
+		// this is from other package
+		testStartCmd(t)
+	})
+
+	t.Run("Composer install", func(t *testing.T) {
+		testComposerInstall(t)
+	})
+
+	t.Run("Composer help", func(t *testing.T) {
+		testComposerHelp(t)
+	})
+
+	t.Run("Run with arguments", func(t *testing.T) {
+		testRunWithArguments(t)
+	})
+
+	t.Run("Run doctrine migrations", func(t *testing.T) {
+		testRunDoctrineMigration(t)
+	})
+
+	t.Run("Run with --help argument", func(t *testing.T) {
+		testRunWithHelp(t)
+	})
+
+	t.Run("Symfony console load fixtures", func(t *testing.T) {
+		testConsoleLoadFixtures(t)
+	})
+
+	t.Run("Db export mysql", func(t *testing.T) {
+		testExportMysqlDb(t)
+	})
+
+	t.Run("Db import mysql", func(t *testing.T) {
+		testImportMysql(t)
+	})
+
+	t.Run("Destory Everything", func(t *testing.T) {
+		testDestroy(t)
+	})
+}
+
+func testComposerInstall(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"composer", "install"})
+
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "Executing script assets:install public [OK]")
+
+	_, errVendor := os.Stat("./vendor")
+	assert.NoError(t, errVendor)
+}
+
+func testComposerHelp(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"composer", "--help"})
+
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "/usr/local/bin/composer list --raw")
+}
+
+func testRunWithArguments(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"run", "ls", "-la"})
+
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	assert.Contains(t, cleanOutput, ".")
+	assert.Contains(t, cleanOutput, "..")
+	assert.Contains(t, cleanOutput, ".devcontainer")
+	assert.Contains(t, cleanOutput, ".editorconfig")
+	assert.Contains(t, cleanOutput, ".env")
+	assert.Contains(t, cleanOutput, ".env.dev")
+	assert.Contains(t, cleanOutput, ".env.prod")
+	assert.Contains(t, cleanOutput, ".gitignore")
+	assert.Contains(t, cleanOutput, ".mt.yaml")
+	assert.Contains(t, cleanOutput, ".php-cs-fixer.dist.php")
+	assert.Contains(t, cleanOutput, ".phpactor.json")
+	assert.Contains(t, cleanOutput, ".vscode")
+	assert.Contains(t, cleanOutput, "README.md")
+	assert.Contains(t, cleanOutput, "assets")
+	assert.Contains(t, cleanOutput, "bin")
+	assert.Contains(t, cleanOutput, "composer.json")
+	assert.Contains(t, cleanOutput, "composer.lock")
+	assert.Contains(t, cleanOutput, "config")
+	assert.Contains(t, cleanOutput, "docker")
+	assert.Contains(t, cleanOutput, "info.md")
+	assert.Contains(t, cleanOutput, "migrations")
+	assert.Contains(t, cleanOutput, "node_modules")
+	assert.Contains(t, cleanOutput, "package-lock.json")
+	assert.Contains(t, cleanOutput, "package.json")
+	assert.Contains(t, cleanOutput, "public")
+	assert.Contains(t, cleanOutput, "src")
+	assert.Contains(t, cleanOutput, "symfony.lock")
+	assert.Contains(t, cleanOutput, "templates")
+	assert.Contains(t, cleanOutput, "var")
+	assert.Contains(t, cleanOutput, "vendor")
+	assert.Contains(t, cleanOutput, "vite.config.js")
+	assert.Contains(t, cleanOutput, "")
+}
+
+func testRunDoctrineMigration(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	// Destory db
+	rootCmd.SetArgs([]string{"run", "php", "bin/console", "doctrine:database:drop", "--force"})
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "Dropped database `appDb` for connection named default")
+
+	// create new db
+	rootCmd.SetArgs([]string{"run", "php", "bin/console", "doctrine:database:create"})
+	errExec = rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput = base.StripANSI(buf.String())
+
+	lastLine = base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "Created database `appDb` for connection named default")
+
+	// apply migration
+	rootCmd.SetArgs([]string{"run", "php", "bin/console", "doctrine:migration:migrate", "-n"})
+	errExec = rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput = base.StripANSI(buf.String())
+
+	lastLine = base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "[OK] Successfully migrated to version: DoctrineMigrations\\Version2026062021191")
+}
+
+func testRunWithHelp(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"run", "ls", "--help"})
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "or available locally via: info '(coreutils) ls invocation'")
+}
+
+func testConsoleLoadFixtures(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"php", "console", "doctrine:fixtures:load", "-n"})
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "   > loading App\\DataFixtures\\AppFixtures")
+}
+
+func testExportMysqlDb(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	db := config.GetDbConfig()
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	// export db
+	rootCmd.SetArgs([]string{"db", "export"})
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "Created Dump Successfully")
+
+	_, err := os.Stat(config.ProjectConfig.ProjectName + db.Filetype)
+	assert.NoError(t, err)
+}
+
+func testImportMysql(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	db := config.GetDbConfig()
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"db", "import", "-f", config.ProjectConfig.ProjectName + db.Filetype})
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "Imported the Database dump into "+config.ProjectConfig.ProjectName)
+}
+
+func testDestroy(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	db := config.GetDbConfig()
+
+	// delete vendor directory
+	vendorErr := os.RemoveAll("vendor")
+	assert.Nil(t, vendorErr)
+
+	dbDumpErr := os.RemoveAll(config.ProjectConfig.ProjectName + db.Filetype)
+	assert.Nil(t, dbDumpErr)
+
+	rootCmd := cmd.RootCmd
+	base.SilentCommand(t, rootCmd, []string{"stack", "destroy"})
+}

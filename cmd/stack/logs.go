@@ -19,7 +19,7 @@ import (
 var followLogs bool
 
 var logsCmd = &cobra.Command{
-	Use:                   "logs [service]",
+	Use:                   "logs [flags] [service]",
 	Short:                 "Show container logs",
 	GroupID:               "stack",
 	DisableFlagsInUseLine: true,
@@ -40,6 +40,7 @@ func init() {
 }
 
 func logsStack(out io.Writer, follow bool, service string) {
+	// todo add valdation for those two
 	var projectName string = config.ProjectConfig.ProjectName
 	var dockerPath string = config.ProjectConfig.Paths.DockerCompose
 
@@ -53,6 +54,7 @@ func logsStack(out io.Writer, follow bool, service string) {
 		cmdArgs = append(cmdArgs, "-f")
 	}
 
+	// Falls ein spezifischer Container/Service angegeben wurde
 	if service != "" {
 		cmdArgs = append(cmdArgs, service)
 	}
