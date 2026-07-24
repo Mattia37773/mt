@@ -10,7 +10,7 @@ import (
 	"os/exec"
 
 	"github.com/mattia37773/mt/config"
-	"github.com/mattia37773/mt/helper/docker"
+	"github.com/mattia37773/mt/helper/basecmd"
 	"github.com/mattia37773/mt/helper/shell"
 	"github.com/mattia37773/mt/ui/form"
 	"github.com/mattia37773/mt/ui/text"
@@ -64,7 +64,8 @@ func init() {
 func importDb(out io.Writer, file string, projectName string, db config.DbConfig) {
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
-	docker.ContainerExists(projectName + "-" + config.ProjectConfig.DB.ContainerName)
+
+	basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
 
 	copy := exec.Command("docker", "cp", "./"+file, projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype)
 	shell.ExecuteCommandOnlyErrors(copy)

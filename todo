@@ -6,21 +6,11 @@
   - update
   - yarn
 
----
-
 - test
   - all
-
-- e2e
+- e2e + test with builded binary + should maybe be isolated from other app parts
   - mutliple test profile
-
 - external
   - all with already compiled binary
-
-- also make error test for when it should failt
-- remove requirement for .mt.yaml file
-
-- run command can execeute command inside a shell with a specific user
-- main container in config
-- rework test entirely so they check only the builded thing and not the execeution itself
-- interactive cofnig create command
+- golang ci for linting
+- goreleaser

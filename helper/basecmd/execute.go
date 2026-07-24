@@ -1,0 +1,126 @@
+package basecmd
+
+import (
+	"fmt"
+	"io"
+	"os"
+	"os/exec"
+	"strings"
+
+	"github.com/charmbracelet/x/term"
+	"github.com/mattia37773/mt/config"
+
+	"github.com/mattia37773/mt/helper/docker"
+	"github.com/mattia37773/mt/helper/shell"
+	"github.com/mattia37773/mt/ui/text"
+)
+
+func ExecuteBackendCommand(out io.Writer, baseCommand string, args []string) []string {
+	container := config.ProjectConfig.Backend.ContainerName
+	ValidateProjectName(out)
+	ValidateContainer(out, container, "Backend")
+
+	return BaseCommandGen(out, baseCommand, container, args)
+}
+
+func ExecuteFrontendCommand(out io.Writer, baseCommand string, args []string) []string {
+	container := config.ProjectConfig.Frontend.ContainerName
+	ValidateProjectName(out)
+	ValidateContainer(out, container, "Frontend")
+	return BaseCommandGen(out, baseCommand, container, args)
+}
+
+func ExecuteDbCommand(out io.Writer, baseCommand string, args []string) []string {
+	container := config.ProjectConfig.DB.ContainerName
+	ValidateProjectName(out)
+	ValidateContainer(out, container, "Db")
+	return BaseCommandGen(out, baseCommand, container, args)
+}
+
+func ExecuteMainCommand(out io.Writer, baseCommand string, args []string) []string {
+	container := config.ProjectConfig.Main.ContainerName
+	ValidateProjectName(out)
+	ValidateContainer(out, container, "Main")
+	return BaseCommandGen(out, baseCommand, container, args)
+}
+
+func BaseCommandGen(out io.Writer, baseCommand string, container string, args []string) []string {
+	var projectName string = config.ProjectConfig.ProjectName
+
+	// Normal unittest run without docker
+	if config.Environment != "test" {
+		CheckContainerExits(out, projectName+"-"+container)
+		commandExists := docker.CommandExistsInContainer(projectName+"-"+container, baseCommand)
+		if commandExists == false {
+			fmt.Fprintf(out, text.Red("Error: The command: %s isn't available inside the %s\n"), baseCommand, container)
+			os.Exit(1)
+		}
+	}
+
+	cmdStr := baseCommand + " " + strings.Join(args, " ")
+
+	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
+	fmt.Fprintln(out, "")
+	fmt.Printf("Running %s in %s-%s \n", cmdStr, projectName, container)
+
+	// checks if the terminal has a tty
+	execArgs := []string{"exec"}
+	if file, ok := out.(*os.File); ok && term.IsTerminal(file.Fd()) {
+		execArgs = append(execArgs, "-it")
+	}
+
+	execArgs = append(execArgs, projectName+"-"+container, "sh", "-c", cmdStr)
+
+	return execArgs
+}
+
+func ExecuteCommand(out io.Writer, execArgs []string) {
+	cmd := exec.Command("docker", execArgs...)
+
+	cmd.Stdout = out
+	cmd.Stderr = out
+
+	shell.ExecuteCommand(cmd)
+}
+
+func ExecuteHostCommand(out io.Writer, execArgs []string) {
+	cmd := exec.Command(execArgs[0], execArgs[1:]...)
+
+	cmd.Stdout = out
+	cmd.Stderr = out
+	cmd.Stdin = os.Stdin
+
+	shell.ExecuteCommand(cmd)
+}
+
+// only print errors to screen
+func ExecuteCommandOnlyErrors(out io.Writer, execArgs []string) {
+	cmd := exec.Command("docker", execArgs...)
+
+	cmd.Stdout = out
+	cmd.Stderr = out
+
+	err := shell.ExecuteCommandOnlyErrors(cmd)
+	if err != "" {
+		fmt.Println("Error:", err)
+	}
+}
+
+func StackExecute(out io.Writer, execArgs []string, successText string) {
+	cmd := exec.Command(execArgs[0], execArgs[1:]...)
+
+	cmd.Stdout = out
+	cmd.Stderr = out
+	cmd.Stdin = os.Stdin
+
+	err := shell.ExecuteCommand(cmd)
+	if err != nil {
+		fmt.Fprint(out, text.Red("Something went wrong: "))
+		fmt.Fprintln(out, err)
+		os.Exit(1)
+	}
+
+	if successText != "" {
+		fmt.Fprintln(out, text.Green(successText))
+	}
+}

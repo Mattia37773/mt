@@ -32,7 +32,8 @@ func exportDb(out io.Writer, args []string) {
 	var projectName string = config.ProjectConfig.ProjectName
 	var db config.DbConfig = config.GetDbConfig()
 
-	basecmd.ExecuteDbCommand(out, db.Export, args)
+	cmd := basecmd.ExecuteDbCommand(out, db.Export, args)
+	basecmd.ExecuteCommand(out, cmd)
 
 	copy := exec.Command("docker", "cp", projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype, "./")
 	copy.Output()

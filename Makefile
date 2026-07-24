@@ -1,6 +1,5 @@
-TEST_ENV        ?= test
 APP_ENV         ?= dev
-TEST  			:= cmd
+TEST_PACKAGE    := cmd
 MODULE_PATH 	:= github.com/mattia37773
 APP_NAME        := mt
 BUILD_METHOD 	:= source
@@ -24,19 +23,19 @@ watch: ## Recompile on filechange
 
 test: ## Run the testsuite
 	go clean -cache
-	go test -v ./$(TEST)/... -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=$(TEST_ENV)'" ./...  | grep -v '\[no test files\]'
+	go test -v ./$(TEST_PACKAGE)/... -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'" ./...  | grep -v '\[no test files\]'
 
 test-all: ## Run the testsuite with showing directories without tests
 	go clean -cache
-	go test -v -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=$(TEST_ENV)'" ./... 
+	go test -v ./$(TEST_PACKAGE)/... -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'" ./... 
 
 test-basic: ## Run the testsuite wihout the verbose flag
 	go clean -cache
-	go test -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=$(TEST_ENV)'" ./...
+	go test ./$(TEST_PACKAGE)/... -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'" ./...
 
 test-cover: ## Show the test coverage
 	go clean -cache
-	go test -cover -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=$(TEST_ENV)'" ./...
+	go test  ./$(TEST_PACKAGE)/... -cover -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'" ./...
 
 build: ## Build the binary
 	GIT_TAG=$(GIT_TAG) go build -ldflags="\

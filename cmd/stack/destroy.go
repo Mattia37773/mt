@@ -6,11 +6,8 @@ package stack
 import (
 	"fmt"
 	"io"
-	"os"
-	"os/exec"
 
-	"github.com/mattia37773/mt/config"
-	"github.com/mattia37773/mt/helper/shell"
+	"github.com/mattia37773/mt/helper/basecmd"
 	"github.com/mattia37773/mt/ui/text"
 
 	"github.com/spf13/cobra"
@@ -22,7 +19,10 @@ var destroyCmd = &cobra.Command{
 	GroupID:               "stack",
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		destroyStack(c.OutOrStdout())
+		out := c.OutOrStdout()
+
+		cmd := destroyGen(out)
+		basecmd.StackExecute(out, cmd, "Successfully destroyed the stack")
 	},
 }
 
@@ -30,21 +30,14 @@ func init() {
 	StackCmd.AddCommand(destroyCmd)
 }
 
-func destroyStack(out io.Writer) {
-	var projectName string = config.ProjectConfig.ProjectName
-	var dockerPath string = config.ProjectConfig.Paths.DockerCompose
+func destroyGen(out io.Writer) []string {
+	var projectName string = basecmd.ValidateProjectName(out)
+	var dockerPath string = basecmd.ValidateDockerPath(out)
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
 	fmt.Fprintln(out, "DESTROY all project specific IMAGES, VOLUMES and NETWORKS")
 
-	cmd := exec.Command("docker", "compose", "-f", dockerPath, "down", "-v", "--rmi", "all")
-	err := shell.ExecuteCommand(cmd)
-	if err != nil {
-		fmt.Fprint(out, text.Red("Something went wrong: "))
-		fmt.Fprintln(out, err)
-		os.Exit(1)
-	}
-
-	fmt.Fprintln(out, text.Green("Successfully destroyed the stack"))
+	execArgs := fmt.Sprintf("docker compose -f %s down -v --rmi all", dockerPath)
+	return []string{"sh", "-c", execArgs}
 }

@@ -8,7 +8,6 @@ import (
 )
 
 func ExecuteCommand(cmd *exec.Cmd) error {
-	// Nur auf os.Stdout / os.Stderr setzen, falls noch kein Writer zugewiesen wurde!
 	if cmd.Stdout == nil {
 		cmd.Stdout = os.Stdout
 	}
@@ -20,7 +19,7 @@ func ExecuteCommand(cmd *exec.Cmd) error {
 	}
 
 	if err := cmd.Start(); err != nil {
-		return err // Fehler beim Starten direkt zurückgeben
+		return err
 	}
 
 	sigChan := make(chan os.Signal, 1)
@@ -64,7 +63,7 @@ func ExecuteCommandReturn(cmd *exec.Cmd) (string, error) {
 	return stdoutBuf.String(), nil
 }
 
-func ExecuteCommandOnlyErrors(cmd *exec.Cmd) {
+func ExecuteCommandOnlyErrors(cmd *exec.Cmd) string {
 	var stderrBuf bytes.Buffer
 	var out bytes.Buffer
 
@@ -78,12 +77,13 @@ func ExecuteCommandOnlyErrors(cmd *exec.Cmd) {
 		fmt.Println()
 
 		if stderrBuf.Len() > 0 {
-			fmt.Println("Error:", stderrBuf.String())
+			return stderrBuf.String()
 		}
-		if out.Len() > 0 {
-			fmt.Println("Output:", out.String())
-		}
+		// if out.Len() > 0 {
+		// 	fmt.Println("Output:", out.String())
+		// }
 
 		os.Exit(1)
 	}
+	return ""
 }

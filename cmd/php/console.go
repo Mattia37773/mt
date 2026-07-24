@@ -18,7 +18,10 @@ var consoleCmd = &cobra.Command{
 	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		consoleSymfony(c.OutOrStdout(), args)
+		out := c.OutOrStdout()
+
+		cmd := consoleGen(out, args)
+		basecmd.ExecuteCommand(out, cmd)
 	},
 }
 
@@ -26,6 +29,6 @@ func init() {
 	PhpCmd.AddCommand(consoleCmd)
 }
 
-func consoleSymfony(out io.Writer, args []string) {
-	basecmd.ExecuteBackendCommand(out, "bin/console", args)
+func consoleGen(out io.Writer, args []string) []string {
+	return basecmd.ExecuteBackendCommand(out, "bin/console", args)
 }

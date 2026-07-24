@@ -51,8 +51,7 @@ func GetDbConfig() DbConfig {
 		return getMongoDbConfig()
 	}
 
-	os.Exit(1)
-	// Will never return because of exit
-	// is only here to satisfy the compiler
+	// only here for the compiler.
+	// this location should never be reached
 	return DbConfig{}
 }

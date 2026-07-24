@@ -2,76 +2,49 @@ package single
 
 import (
 	"bytes"
-	"io"
-	"os"
 	"testing"
 
 	"github.com/mattia37773/mt/cmd"
-
 	"github.com/mattia37773/mt/tests/base"
-	"github.com/spf13/cobra"
+
+	_ "github.com/mattia37773/mt/cmd/db"
+	_ "github.com/mattia37773/mt/cmd/php"
+	_ "github.com/mattia37773/mt/cmd/stack"
 	"github.com/stretchr/testify/assert"
 )
 
-func captureStdout(f func()) string {
-	oldStdout := os.Stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	outC := make(chan string)
-	go func() {
-		var buf bytes.Buffer
-		_, _ = io.Copy(&buf, r)
-		outC <- buf.String()
-	}()
-
-	f()
-
-	_ = w.Close()
-	os.Stdout = oldStdout
-	return <-outC
-}
-
 func TestHelpStyle(t *testing.T) {
-	base.ChangeDirToDefault(t)
+	buf := new(bytes.Buffer)
 
-	RootCmd := cmd.RootCmd
+	rootCmd := cmd.RootCmd
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+	rootCmd.SetArgs([]string{"--help"})
 
-	var dummyFlag bool
-	RootCmd.Flags().BoolVarP(&dummyFlag, "help", "h", false, "help for mt")
+	err := rootCmd.Execute()
+	assert.NoError(t, err)
 
-	RootCmd.AddCommand(&cobra.Command{
-		Use:   "completion",
-		Short: "Generate the autocompletion script for the specified shell",
-	})
-	RootCmd.AddCommand(shellCmd)
-	RootCmd.AddCommand(&cobra.Command{
-		Use:   "help",
-		Short: "Shows the help text for an command",
-	})
-
-	helpStyle()
-
-	rawOutput := captureStdout(func() {
-		_ = RootCmd.Help()
-	})
-
-	cleanOutput := base.StripANSI(rawOutput)
+	cleanOutput := base.StripANSI(buf.String())
 
 	assert.Contains(t, cleanOutput, "Usage: mt [options] [command] [flags]")
 	assert.Contains(t, cleanOutput, "A tool for managing projects")
 	assert.Contains(t, cleanOutput, "Commands:")
-	assert.Contains(t, cleanOutput, "completion")
-	assert.Contains(t, cleanOutput, "Generate the autocompletion script for the specified shell")
-	assert.Contains(t, cleanOutput, "shell")
-	assert.Contains(t, cleanOutput, "Open a shell in a container")
-	assert.Contains(t, cleanOutput, "help")
-	assert.Contains(t, cleanOutput, "Shows the help text for an command")
+
+	assert.Contains(t, cleanOutput, "completion  Generate the autocompletion script for the specified shell")
+
+	assert.Contains(t, cleanOutput, "db          Manage the local database")
+	assert.Contains(t, cleanOutput, "help        Shows the help text for an command")
+	assert.Contains(t, cleanOutput, "php         Run some popular PHP tasks")
+	assert.Contains(t, cleanOutput, "run         Run a Command inside the Backend Container")
+	assert.Contains(t, cleanOutput, "shell       Open a shell in a container")
+	assert.Contains(t, cleanOutput, "stack       Manage the local docker stac")
+
 	assert.Contains(t, cleanOutput, "Flags:")
-	assert.Contains(t, cleanOutput, "-h, --help")
+	assert.Contains(t, cleanOutput, "-h, --help      help for mt")
+	assert.Contains(t, cleanOutput, "-v, --version   version for mt")
 }
 
-func TestNotFound(t *testing.T) {
+func TestCommandNotFound(t *testing.T) {
 	rootCmd := cmd.RootCmd
 
 	buf := new(bytes.Buffer)

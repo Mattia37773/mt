@@ -17,7 +17,10 @@ var craftCmd = &cobra.Command{
 	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		craft(c.OutOrStdout(), args)
+		out := c.OutOrStdout()
+
+		cmd := craftGen(out, args)
+		basecmd.ExecuteCommand(out, cmd)
 	},
 }
 
@@ -25,6 +28,6 @@ func init() {
 	PhpCmd.AddCommand(craftCmd)
 }
 
-func craft(out io.Writer, args []string) {
-	basecmd.ExecuteBackendCommand(out, "php craft", args)
+func craftGen(out io.Writer, args []string) []string {
+	return basecmd.ExecuteBackendCommand(out, "php craft", args)
 }

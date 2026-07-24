@@ -28,5 +28,7 @@ func init() {
 
 func shellDb(out io.Writer, args []string) {
 	var db config.DbConfig = config.GetDbConfig()
-	basecmd.ExecuteDbCommand(out, db.Shell, args)
+
+	cmd := basecmd.ExecuteDbCommand(out, db.Shell, args)
+	basecmd.ExecuteCommand(out, cmd)
 }

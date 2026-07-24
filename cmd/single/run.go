@@ -19,7 +19,10 @@ var runCmd = &cobra.Command{
 	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		runSingle(c.OutOrStdout(), args)
+		out := c.OutOrStdout()
+
+		cmd := runGen(out, args)
+		basecmd.ExecuteCommand(out, cmd)
 	},
 }
 
@@ -27,6 +30,6 @@ func init() {
 	cmd.RootCmd.AddCommand(runCmd)
 }
 
-func runSingle(out io.Writer, args []string) {
-	basecmd.ExecuteMainCommand(out, "", args)
+func runGen(out io.Writer, args []string) []string {
+	return basecmd.ExecuteMainCommand(out, "", args)
 }

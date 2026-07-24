@@ -6,12 +6,9 @@ package single
 import (
 	"fmt"
 	"io"
-	"os/exec"
 
 	"github.com/mattia37773/mt/cmd"
-	"github.com/mattia37773/mt/config"
-	"github.com/mattia37773/mt/helper/docker"
-	"github.com/mattia37773/mt/helper/shell"
+	"github.com/mattia37773/mt/helper/basecmd"
 
 	"github.com/mattia37773/mt/ui/text"
 
@@ -29,7 +26,8 @@ var shellCmd = &cobra.Command{
 
 		user, _ := c.Flags().GetString("user")
 
-		shellSingle(c.OutOrStdout(), args, user)
+		cmd := shellGen(c.OutOrStdout(), user, args)
+		basecmd.ExecuteHostCommand(c.OutOrStdout(), cmd)
 		return nil
 	},
 }
@@ -39,23 +37,23 @@ func init() {
 	shellCmd.Flags().StringP("user", "u", "", "User to Connect to the Container")
 }
 
-func shellSingle(out io.Writer, args []string, user string) {
-	var projectName string = config.ProjectConfig.ProjectName
+func shellGen(out io.Writer, user string, args []string) []string {
+	var projectName string = basecmd.ValidateProjectName(out)
 	var container string = args[0]
-	var cmd *exec.Cmd
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
 
-	docker.ContainerExists(projectName + "-" + container)
+	basecmd.CheckContainerExits(out, projectName+"-"+container)
 	fmt.Fprintf(out, "Opening Shell %s in %s-%s \n", "bash", projectName, container)
 
+	var execArgs string
 	if user != "" {
-		cmd = exec.Command("sh", "-c", "docker exec -u "+user+" -it "+projectName+"-"+container+" $(docker exec "+projectName+"-"+container+" sh -c 'command -v bash || echo /bin/sh')")
+		execArgs = fmt.Sprintf("docker exec -u %s -it %s-%s $(docker exec %s-%s sh -c 'command -v bash || echo /bin/sh')", user, projectName, container, projectName, container)
 
 	} else {
-		cmd = exec.Command("sh", "-c", "docker exec -it "+projectName+"-"+container+" $(docker exec "+projectName+"-"+container+" sh -c 'command -v bash || echo /bin/sh')")
+		execArgs = fmt.Sprintf("docker exec -it %s-%s $(docker exec %s-%s sh -c 'command -v bash || echo /bin/sh')", projectName, container, projectName, container)
 	}
 
-	shell.ExecuteCommand(cmd)
+	return []string{"sh", "-c", execArgs}
 }

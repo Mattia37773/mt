@@ -17,7 +17,10 @@ var composerCmd = &cobra.Command{
 	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		composerSingle(c.OutOrStdout(), args)
+		out := c.OutOrStdout()
+
+		cmd := composerGen(out, args)
+		basecmd.ExecuteCommand(out, cmd)
 	},
 }
 
@@ -25,7 +28,8 @@ func init() {
 	cmd.RootCmd.AddCommand(composerCmd)
 }
 
-func composerSingle(out io.Writer, args []string) {
+func composerGen(out io.Writer, args []string) []string {
+	cmd := basecmd.ExecuteBackendCommand(out, "composer", args)
 
-	basecmd.ExecuteBackendCommand(out, "composer", args)
+	return cmd
 }
