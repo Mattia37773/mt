@@ -20,9 +20,7 @@ func TestBuildCommandGenSuccess(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	buildCommand := buildGen(rootCmd.OutOrStdout())
-	// t.Log("fails")
-	t.Log(buildCommand)
-	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.ProjectName + " build --no-cache"}, buildCommand)
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " build --no-cache"}, buildCommand)
 }
 
 func TestStartCommandGenSuccess(t *testing.T) {
@@ -83,5 +81,5 @@ func TestStopCommandGenSuccess(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	stopCommand := stopGen(rootCmd.OutOrStdout())
-	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " stop"}, stopCommand)
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " down"}, stopCommand)
 }

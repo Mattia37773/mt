@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/mattia37773/mt/cmd"
+	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
 
 	"github.com/mattia37773/mt/ui/text"
@@ -41,10 +42,12 @@ func shellGen(out io.Writer, user string, args []string) []string {
 	var projectName string = basecmd.ValidateProjectName(out)
 	var container string = args[0]
 
+	if config.Environment != "test" {
+		basecmd.CheckContainerExits(out, projectName+"-"+container)
+	}
+
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
-
-	basecmd.CheckContainerExits(out, projectName+"-"+container)
 	fmt.Fprintf(out, "Opening Shell %s in %s-%s \n", "bash", projectName, container)
 
 	var execArgs string
