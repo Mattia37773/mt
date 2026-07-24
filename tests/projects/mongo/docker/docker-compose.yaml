@@ -1,0 +1,44 @@
+name: ${COMPOSE_PROJECT_NAME}
+services:
+  mongo:
+    container_name: ${COMPOSE_PROJECT_NAME}-mongo
+    image: mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: uDb
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongo-data:/data/db/
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+    networks:
+      app-network:
+        - app-network
+
+  # mongo-express:
+  #   container_name: mongo-express
+  #   image: mongo-express
+  #   depends_on:
+  #     mongo:
+  #       condition: service_healthy
+  #       restart: true
+  #   networks:
+  #     - mongo-compose-network
+  #   environment:
+  #     - ME_CONFIG_MONGODB_SERVER=mongo
+  #     - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
+  #     - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+  #     - ME_CONFIG_BASICAUTH_USERNAME=admin
+  #     - ME_CONFIG_BASICAUTH_PASSWORD=password
+  #   ports:
+  #     - '8081:8081'
+  #   volumes:
+  #     - ./.database:/data/db
+
+volumes:
+  mongo-data:
+
+networks:
+  app-network:
+    driver: bridge

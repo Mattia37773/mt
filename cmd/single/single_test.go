@@ -43,7 +43,7 @@ func TestShellCommandGenWithoutUserSuccess(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	shellCommand := shellGen(rootCmd.OutOrStdout(), "", []string{"nginx"})
-	t.Log(shellCommand)
+
 	assert.Equal(t, []string{"sh", "-c", "docker exec -it " + config.ProjectConfig.ProjectName + "-nginx $(docker exec " + config.ProjectConfig.ProjectName + "-nginx sh -c 'command -v bash || echo /bin/sh')"}, shellCommand)
 }
 

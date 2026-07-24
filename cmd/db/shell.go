@@ -18,7 +18,10 @@ var shellCmd = &cobra.Command{
 	GroupID:               "db",
 	DisableFlagsInUseLine: true,
 	Run: func(c *cobra.Command, args []string) {
-		shellDb(c.OutOrStdout(), args)
+		out := c.OutOrStdout()
+
+		cmd := shellGen(out, args)
+		basecmd.ExecuteCommand(out, cmd)
 	},
 }
 
@@ -26,9 +29,6 @@ func init() {
 	DbCmd.AddCommand(shellCmd)
 }
 
-func shellDb(out io.Writer, args []string) {
-	var db config.DbConfig = config.GetDbConfig()
-
-	cmd := basecmd.ExecuteDbCommand(out, db.Shell, args)
-	basecmd.ExecuteCommand(out, cmd)
+func shellGen(out io.Writer, args []string) []string {
+	return basecmd.ExecuteDbCommand(out, config.GetDbConfig().Shell, args)
 }

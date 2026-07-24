@@ -29,7 +29,5 @@ func init() {
 }
 
 func composerGen(out io.Writer, args []string) []string {
-	cmd := basecmd.ExecuteBackendCommand(out, "composer", args)
-
-	return cmd
+	return basecmd.ExecuteBackendCommand(out, "composer", args)
 }

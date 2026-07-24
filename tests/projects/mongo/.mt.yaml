@@ -1,0 +1,23 @@
+# =============================================================================
+# MT CLI Tool Configuration
+# =============================================================================
+
+# Docker Compose Project Configuration
+#projectCompose:
+# paths relative to project root
+projectName: mongotest
+paths:
+  dockerCompose: docker/docker-compose.yaml
+  env: .env
+db:
+  containerName: "db"
+  provider: "mongo"
+  name: "appDb"
+  password: ${DB_PASSWORD}
+  user: "uDb"
+backend:
+  containerName: fpm
+frontend:
+  containerName: fpm
+main:
+  containerName: fpm

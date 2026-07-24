@@ -14,6 +14,12 @@ func ChangeDirToDefault(t *testing.T) {
 	config.ParseConfigFile()
 }
 
+func ChangeDirToMongo(t *testing.T) {
+	dir := rootDir([]string{"tests", "projects", "mongo"})
+	t.Chdir(dir)
+	config.ParseConfigFile()
+}
+
 func ChangeDirToSymfony(t *testing.T) {
 	dir := rootDir([]string{"tests", "projects", "symfony"})
 	t.Chdir(dir)

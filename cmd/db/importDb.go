@@ -23,8 +23,6 @@ var importDbCmd = &cobra.Command{
 	GroupID:               "db",
 	DisableFlagsInUseLine: true,
 	RunE: func(c *cobra.Command, args []string) error {
-		var projectName string = config.ProjectConfig.ProjectName
-		var db config.DbConfig = config.GetDbConfig()
 		out := c.OutOrStdout()
 
 		// File Input
@@ -42,7 +40,7 @@ var importDbCmd = &cobra.Command{
 		}
 		fmt.Fprintln(out, importFile)
 
-		importDb(out, importFile, projectName, db)
+		importExecute(out, importFile)
 		return nil
 	},
 }
@@ -61,20 +59,61 @@ func init() {
 	})
 }
 
-func importDb(out io.Writer, file string, projectName string, db config.DbConfig) {
+func importExecute(out io.Writer, file string) {
+	var projectName string = config.ProjectConfig.ProjectName
+	basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
+
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
 
-	basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
+	// copy
+	copy := copyImportGen(out, file) //exec.Command("docker", "cp", "./"+file, projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype)
+	copyCmd := exec.Command(copy[0], copy[1:]...)
+	copyCmd.Stdout = out
+	copyCmd.Stderr = out
+	copyCmd.Stdin = os.Stdin
+	shell.ExecuteCommandOnlyErrors(copyCmd)
 
-	copy := exec.Command("docker", "cp", "./"+file, projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype)
-	shell.ExecuteCommandOnlyErrors(copy)
-
-	cmd := exec.Command("docker", "exec", "-i", projectName+"-"+config.ProjectConfig.DB.ContainerName+"", "bash", "-pc", db.Import)
+	// import
+	execArgs := importGen(out, file)
+	cmd := exec.Command(execArgs[0], execArgs[1:]...)
+	cmd.Stdout = out
+	cmd.Stderr = out
+	cmd.Stdin = os.Stdin
 	shell.ExecuteCommandOnlyErrors(cmd)
 
-	rm := exec.Command("docker", "exec", projectName+"-"+config.ProjectConfig.DB.ContainerName, "rm", "-rf", "/tmp/blueprint.gzip")
-	rm.Output()
+	// delete
+	rmArgs := removeImportGen(out)
+	rmCmd := exec.Command(rmArgs[0], rmArgs[1:]...)
+	rmCmd.Output()
 
 	fmt.Fprintf(out, text.Green("Imported the Database dump into %s\n"), projectName)
+}
+
+func importGen(out io.Writer, file string) []string {
+	var projectName string = config.ProjectConfig.ProjectName
+	var db config.DbConfig = config.GetDbConfig()
+	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
+
+	return []string{"docker", "exec", "-i", containerName, "bash", "-pc", db.Import}
+}
+
+func copyImportGen(out io.Writer, file string) []string {
+	var projectName string = config.ProjectConfig.ProjectName
+	var db config.DbConfig = config.GetDbConfig()
+	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
+
+	targetPath := fmt.Sprintf("%s:/tmp/%s%s", containerName, projectName, db.Filetype)
+
+	return []string{"docker", "cp", "./" + file, targetPath}
+}
+
+func removeImportGen(out io.Writer) []string {
+	var projectName string = config.ProjectConfig.ProjectName
+	var db config.DbConfig = config.GetDbConfig()
+	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
+
+	targetFile := fmt.Sprintf("/tmp/%s%s", projectName, db.Filetype)
+
+	return []string{"docker", "exec", containerName, "rm", "-rf", targetFile}
 }
