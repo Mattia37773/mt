@@ -5,7 +5,7 @@
 # Docker Compose Project Configuration
 #projectCompose:
 # paths relative to project root
-projectName: codesnippets
+projectName: snippy
 paths:
   dockerCompose: docker/docker-compose.yaml
   env: .env

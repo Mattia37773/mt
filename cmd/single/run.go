@@ -31,5 +31,5 @@ func init() {
 }
 
 func runGen(out io.Writer, args []string) []string {
-	return basecmd.ExecuteMainCommand(out, "", args)
+	return basecmd.ExecuteMainCommand(out, args[0], args[1:])
 }

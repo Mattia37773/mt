@@ -31,7 +31,7 @@ func TestRunCommandGenSuccess(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	runCommand := runGen(rootCmd.OutOrStdout(), []string{"ls", "--help"})
-	assert.Equal(t, []string{"exec", config.ProjectConfig.ProjectName + "-fpm", "sh", "-c", " ls --help"}, runCommand)
+	assert.Equal(t, []string{"exec", config.ProjectConfig.ProjectName + "-fpm", "sh", "-c", "ls --help"}, runCommand)
 }
 
 func TestShellCommandGenWithoutUserSuccess(t *testing.T) {
@@ -43,6 +43,7 @@ func TestShellCommandGenWithoutUserSuccess(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	shellCommand := shellGen(rootCmd.OutOrStdout(), "", []string{"nginx"})
+	t.Log(shellCommand)
 	assert.Equal(t, []string{"sh", "-c", "docker exec -it " + config.ProjectConfig.ProjectName + "-nginx $(docker exec " + config.ProjectConfig.ProjectName + "-nginx sh -c 'command -v bash || echo /bin/sh')"}, shellCommand)
 }
 

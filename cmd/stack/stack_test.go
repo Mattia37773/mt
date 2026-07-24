@@ -6,77 +6,73 @@ import (
 
 	"github.com/mattia37773/mt/cmd"
 	"github.com/mattia37773/mt/config"
+	_ "github.com/mattia37773/mt/helper/basecmd"
 	"github.com/mattia37773/mt/tests/base"
 	"github.com/stretchr/testify/assert"
 )
 
-// func TestBuildCommandGenSuccess(t *testing.T) {
-// 	base.ChangeDirToDefault(t)
-// 	rootCmd := cmd.RootCmd
+func TestBuildCommandGenSuccess(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
 
-// 	buf := new(bytes.Buffer)
-// 	rootCmd.SetOut(buf)
-// 	rootCmd.SetErr(buf)
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
 
-// 	buildCommand := buildGen(rootCmd.OutOrStdout())
-// 	// t.Log("fails")
-// 	t.Log(buildCommand)
-// 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.ProjectName + " build --no-cache"}, buildCommand)
-// }
+	buildCommand := buildGen(rootCmd.OutOrStdout())
+	// t.Log("fails")
+	t.Log(buildCommand)
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.ProjectName + " build --no-cache"}, buildCommand)
+}
 
-// func TestStartCommandGenSuccess(t *testing.T) {
-// 	base.ChangeDirToDefault(t)
-// 	rootCmd := cmd.RootCmd
+func TestStartCommandGenSuccess(t *testing.T) {
 
-// 	buf := new(bytes.Buffer)
-// 	rootCmd.SetOut(buf)
-// 	rootCmd.SetErr(buf)
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
 
-// 	startCommand := startGen(rootCmd.OutOrStdout())
-// 	// t.Log("fails")
-// 	t.Log(startCommand)
-// 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " up -d"}, startCommand)
-// }
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
 
-// func TestDestroyCommandGenSuccess(t *testing.T) {
-// 	base.ChangeDirToDefault(t)
-// 	rootCmd := cmd.RootCmd
+	startCommand := startGen(rootCmd.OutOrStdout())
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " up -d"}, startCommand)
+}
 
-// 	buf := new(bytes.Buffer)
-// 	rootCmd.SetOut(buf)
-// 	rootCmd.SetErr(buf)
+func TestDestroyCommandGenSuccess(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
 
-// 	destroyCommand := destroyGen(rootCmd.OutOrStdout())
-// 	// t.Log("fails")
-// 	t.Log(startCommand)
-// 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " down -v --rmi all"}, destroyCommand)
-// }
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
 
-// func TestPsCommandGenSuccess(t *testing.T) {
-// 	base.ChangeDirToDefault(t)
-// 	rootCmd := cmd.RootCmd
+	destroyCommand := destroyGen(rootCmd.OutOrStdout())
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " down -v --rmi all"}, destroyCommand)
+}
 
-// 	buf := new(bytes.Buffer)
-// 	rootCmd.SetOut(buf)
-// 	rootCmd.SetErr(buf)
+func TestPsCommandGenSuccess(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
 
-// 	psCommand := psGen(rootCmd.OutOrStdout())
-// 	// t.Log("fails")
-// 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " ps"}, psCommand)
-// }
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
 
-// func TestRestartCommandGenSuccess(t *testing.T) {
-// 	base.ChangeDirToDefault(t)
-// 	rootCmd := cmd.RootCmd
+	psCommand := psGen(rootCmd.OutOrStdout())
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " ps"}, psCommand)
+}
 
-// 	buf := new(bytes.Buffer)
-// 	rootCmd.SetOut(buf)
-// 	rootCmd.SetErr(buf)
+func TestRestartCommandGenSuccess(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
 
-// 	restartCommand := restartGen(rootCmd.OutOrStdout())
-// 	// t.Log("fails")
-// 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " restart"}, restartCommand)
-// }
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	restartCommand := restartGen(rootCmd.OutOrStdout())
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " restart"}, restartCommand)
+}
 
 func TestStopCommandGenSuccess(t *testing.T) {
 	base.ChangeDirToDefault(t)
@@ -86,7 +82,6 @@ func TestStopCommandGenSuccess(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	restartCommand := stopGen(rootCmd.OutOrStdout())
-	// t.Log("fails")
-	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " stop"}, restartCommand)
+	stopCommand := stopGen(rootCmd.OutOrStdout())
+	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " stop"}, stopCommand)
 }
