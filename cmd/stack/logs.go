@@ -22,14 +22,18 @@ var logsCmd = &cobra.Command{
 	Short:                 "Show container logs",
 	GroupID:               "stack",
 	DisableFlagsInUseLine: true,
-	Run: func(c *cobra.Command, args []string) {
+	RunE: func(c *cobra.Command, args []string) error {
 		var service string
 		if len(args) > 0 {
 			service = args[0]
 		}
 
-		cmd := logsStack(c.OutOrStdout(), followLogs, service)
+		cmd, err := logsStack(c.OutOrStdout(), followLogs, service)
+		if err != nil {
+			return err
+		}
 		basecmd.StackExecute(c.OutOrStdout(), cmd, "")
+		return nil
 	},
 }
 
@@ -39,10 +43,17 @@ func init() {
 	logsCmd.Flags().BoolVarP(&followLogs, "follow", "f", false, "Follow log output")
 }
 
-func logsStack(out io.Writer, follow bool, service string) []string {
+func logsStack(out io.Writer, follow bool, service string) ([]string, error) {
 
-	var projectName string = basecmd.ValidateProjectName(out)
-	var dockerPath string = basecmd.ValidateDockerPath(out)
+	projectName, err := basecmd.ValidateProjectName(out)
+	if err != nil {
+		return []string{}, err
+	}
+
+	dockerPath, err := basecmd.ValidateDockerPath(out)
+	if err != nil {
+		return []string{}, err
+	}
 
 	if config.Environment != "test" {
 		basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.Main.ContainerName)
@@ -63,5 +74,5 @@ func logsStack(out io.Writer, follow bool, service string) []string {
 	}
 	fmt.Println([]string{"sh", "-c", strings.Join(execArgs, " ")})
 
-	return []string{"sh", "-c", strings.Join(execArgs, " ")}
+	return []string{"sh", "-c", strings.Join(execArgs, " ")}, nil
 }

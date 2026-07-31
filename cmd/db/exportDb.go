@@ -19,10 +19,14 @@ var exportDbCmd = &cobra.Command{
 	Short:                 "Export the local database",
 	GroupID:               "db",
 	DisableFlagsInUseLine: true,
-	Run: func(c *cobra.Command, args []string) {
+	RunE: func(c *cobra.Command, args []string) error {
 		out := c.OutOrStdout()
 
-		exportExecute(out, args)
+		err := exportExecute(out, args)
+		if err != nil {
+			return err
+		}
+		return nil
 	},
 }
 
@@ -30,8 +34,18 @@ func init() {
 	DbCmd.AddCommand(exportDbCmd)
 }
 
-func exportExecute(out io.Writer, args []string) {
-	cmd := exportGen(out, args)
+func exportExecute(out io.Writer, args []string) error {
+
+	containerErr := basecmd.CheckContainerExits(out, config.ProjectConfig.ProjectName+"-"+config.ProjectConfig.DB.ContainerName)
+	if containerErr != nil {
+		return containerErr
+	}
+
+	cmd, exportGenError := exportGen(out, args)
+	if exportGenError != nil {
+		return exportGenError
+	}
+
 	basecmd.ExecuteCommandOnlyErrors(out, cmd)
 
 	//copy := exec.Command("docker", "cp", projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype, "./")
@@ -45,9 +59,11 @@ func exportExecute(out io.Writer, args []string) {
 	removeExportCmd.Output()
 
 	fmt.Fprint(out, text.Green("Created Dump Successfully\n"))
+
+	return nil
 }
 
-func exportGen(out io.Writer, args []string) []string {
+func exportGen(out io.Writer, args []string) ([]string, error) {
 	return basecmd.ExecuteDbCommand(out, config.GetDbConfig().Export, args)
 }
 

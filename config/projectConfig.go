@@ -8,7 +8,6 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/joho/godotenv"
-	"github.com/mattia37773/mt/ui/text"
 )
 
 var exitFunc = os.Exit
@@ -44,35 +43,39 @@ type ConfigStruct struct {
 
 var ProjectConfig ConfigStruct
 
-func ParseConfigFile() {
+func ParseConfigFile() error {
 
 	data, err := os.ReadFile(".mt.yaml")
-
 	if err != nil {
-		return
+		return nil
 	}
 
-	envFile := getEnvFile(data)
+	// for errors with formatting
+	if err := yaml.Unmarshal([]byte(data), &ProjectConfig); err != nil {
+		return fmt.Errorf("An error osccurred while parsing '.mt.yaml': \n%s", err)
+	}
+
+	envFile, err := getEnvFile(data)
+	if err != nil {
+		return err
+	}
 
 	err = godotenv.Load(envFile)
 	if err != nil {
-		fmt.Print(text.Red("The defined env file in .mt.yaml doesnt exist: " + envFile + "\n"))
-		exitFunc(1)
+		return fmt.Errorf("The defined env file in .mt.yaml doesnt exist: %s", envFile)
 	}
 
 	// check and resolve env vars
 	expandedData, err := expandEnvVarsStrict(string(data))
 	if err != nil {
-		fmt.Printf(text.Red("%v\n"), err)
-		exitFunc(1)
+		return fmt.Errorf("%v\n", err)
 	}
 
 	// resolve to struct
 	if err := yaml.Unmarshal([]byte(expandedData), &ProjectConfig); err != nil {
-		fmt.Println(text.Red("Error with parsing the config file '.mt.yaml': "))
-		fmt.Printf("%v\n", err)
-		exitFunc(1)
+		return fmt.Errorf("An error occurred while parsing '.mt.yaml'")
 	}
+	return nil
 }
 
 func expandEnvVarsStrict(input string) (string, error) {
@@ -98,19 +101,18 @@ func expandEnvVarsStrict(input string) (string, error) {
 	return result, nil
 }
 
-func getEnvFile(data []byte) string {
+func getEnvFile(data []byte) (string, error) {
 
 	path, _ := yaml.PathString("$.paths.env")
 
 	var envFile string
 	if err := path.Read(strings.NewReader(string(data)), &envFile); err != nil {
-		return ".env"
+		return "", fmt.Errorf("The defined env file in .mt.yaml doesnt exist: %s", envFile)
 	}
 
 	if envFile == "" {
-		fmt.Println(text.Red("No Envfile is set"))
-		fmt.Println("Please set one in .mt.yaml")
+		return "", fmt.Errorf("No Envfile is set: %s \n Please set one in .mt.yaml", envFile)
 	}
 
-	return envFile
+	return envFile, nil
 }

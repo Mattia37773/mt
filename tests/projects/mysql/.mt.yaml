@@ -1,0 +1,23 @@
+# =============================================================================
+# MT CLI Tool Configuration
+# =============================================================================
+
+# Docker Compose Project Configuration
+#projectCompose:
+# paths relative to project root
+projectName: snippy
+paths:
+  dockerCompose: docker/docker-compose.yaml
+  env: docker/.env
+db:
+  containerName: "db"
+  provider: "mysql"
+  name: "appDb"
+  password: ${MYSQL_ROOT_PASSWORD}
+  user: "root"
+backend:
+  containerName: fpm
+frontend:
+  containerName: fpm
+main:
+  containerName: fpm

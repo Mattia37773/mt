@@ -1,0 +1,23 @@
+# =============================================================================
+# MT CLI Tool Configuration
+# =============================================================================
+
+# Docker Compose Project Configuration
+#projectCompose:
+# paths relative to project root
+projectName: nixy
+paths:
+  dockerCompose:
+  env: .env
+db:
+  containerName: "fpm"
+  provider: "mysql"
+  name: "appDb"
+  password: rewq
+  user: "uDb"
+backend:
+  containerName: fpm
+frontend:
+  containerName: fpm
+main:
+  containerName: fpm

@@ -21,6 +21,13 @@ var RootCmd = &cobra.Command{
 	Long:          `This is a tool to manage local project.`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		err := config.ParseConfigFile()
+		if err != nil {
+			return err
+		}
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -36,13 +43,10 @@ func Execute() {
 }
 
 func init() {
-	if config.Environment != "test" {
-		// load the project config
-		config.ParseConfigFile()
-	}
+	// load the project config
 
 	versionStyle(RootCmd)
-	RootCmd.Version = config.AppConfig.Version
+	RootCmd.Version = config.Version
 
 	// When the command is update
 	// the message shouldn't show up
@@ -50,11 +54,13 @@ func init() {
 		arg := os.Args[1:]
 		argName := strings.Join(arg, "")
 		if argName != "update" {
-			showUpdateMessage(config.AppConfig.Version)
+			showUpdateMessage(config.Version)
 		}
 	} else {
-		showUpdateMessage(config.AppConfig.Version)
+		showUpdateMessage(config.Version)
 	}
+
+	//RootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
 func versionStyle(cmd *cobra.Command) {
@@ -68,14 +74,14 @@ func versionStyle(cmd *cobra.Command) {
 
 func errorMessage(err error) {
 	errorText := strings.Split(err.Error(), "\n")
-	fmt.Println(text.Red("Error:"), strings.NewReplacer("[", "", "]", "").Replace(errorText[0]))
 
-	if len(errorText) > 1 {
-		fmt.Println(errorText[2])
-		fmt.Println(errorText[3])
-		fmt.Println()
+	fmt.Println(text.Red("Error:"), errorText[0])
+
+	for _, line := range errorText[1:] {
+		fmt.Println(line)
 	}
 
+	fmt.Println()
 	fmt.Println(text.GlowPink("Try mt --help for usage."))
 	os.Exit(1)
 }
@@ -86,7 +92,7 @@ func showUpdateMessage(version string) {
 		if version != "dev" {
 			lines := []string{
 				"A new update is available",
-				"Current Version: " + config.AppConfig.Version,
+				"Current Version: " + config.Version,
 				"Latest  Version: " + latestVersion,
 			}
 			ui.Border(lines)

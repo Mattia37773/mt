@@ -10,11 +10,11 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - mongo-data:/data/db/
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    # healthcheck:
+    #   test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
     networks:
-      app-network:
-        - app-network
+      - app-network
 
   # mongo-express:
   #   container_name: mongo-express

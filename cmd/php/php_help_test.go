@@ -6,7 +6,7 @@ import (
 
 	"github.com/mattia37773/mt/cmd"
 
-	"github.com/mattia37773/mt/tests/base"
+	base "github.com/mattia37773/mt/helper/basetest"
 	"github.com/stretchr/testify/assert"
 )
 

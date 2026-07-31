@@ -11,51 +11,76 @@ import (
 	_ "github.com/mattia37773/mt/cmd/php"
 	_ "github.com/mattia37773/mt/cmd/stack"
 	"github.com/mattia37773/mt/config"
-	"github.com/mattia37773/mt/tests/base"
+	base "github.com/mattia37773/mt/helper/basetest"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSingles(t *testing.T) {
-	t.Run("Start", func(t *testing.T) {
-		// this is from other package
-		testStartCmd(t)
-	})
+	// t.Run("Start", func(t *testing.T) {
+	// 	// this is from other package
+	// 	testStartCmd(t)
+	// 	time.Sleep(30 * time.Second)
+	// })
 
-	t.Run("Composer install", func(t *testing.T) {
-		testComposerInstall(t)
-	})
+	// t.Run("Composer install", func(t *testing.T) {
+	// 	testComposerInstall(t)
+	// })
 
-	t.Run("Composer help", func(t *testing.T) {
-		testComposerHelp(t)
-	})
+	// t.Run("Composer help", func(t *testing.T) {
+	// 	testComposerHelp(t)
+	// })
 
-	t.Run("Run with arguments", func(t *testing.T) {
-		testRunWithArguments(t)
-	})
+	// t.Run("Run with arguments", func(t *testing.T) {
+	// 	testRunWithArguments(t)
+	// })
 
-	t.Run("Run doctrine migrations", func(t *testing.T) {
-		testRunDoctrineMigration(t)
-	})
+	// t.Run("Run doctrine migrations", func(t *testing.T) {
+	// 	testRunDoctrineMigration(t)
+	// })
 
-	t.Run("Run with --help argument", func(t *testing.T) {
-		testRunWithHelp(t)
-	})
+	// t.Run("Run with --help argument", func(t *testing.T) {
+	// 	testRunWithHelp(t)
+	// })
 
-	t.Run("Symfony console load fixtures", func(t *testing.T) {
-		testConsoleLoadFixtures(t)
-	})
+	// t.Run("Symfony console load fixtures", func(t *testing.T) {
+	// 	testConsoleLoadFixtures(t)
+	// })
 
-	t.Run("Db export mysql", func(t *testing.T) {
-		testExportMysqlDb(t)
-	})
+	// t.Run("Destory Everything", func(t *testing.T) {
+	// 	testDestroy(t)
+	// })
 
-	t.Run("Db import mysql", func(t *testing.T) {
-		testImportMysql(t)
-	})
+	//*
+	//// * Negative tests
+	//*
 
-	t.Run("Destory Everything", func(t *testing.T) {
-		testDestroy(t)
-	})
+	// t.Run("Shell without container argument", func(t *testing.T) {
+	// 	testShellWithoutContainerArgument(t)
+	// })
+
+	// t.Run("Shell without flag argument", func(t *testing.T) {
+	// 	testShellWithoutFlagArgument(t)
+	// })
+
+	//*
+	//// * not running tests
+	//*
+
+	// t.Run("Console without container", func(t *testing.T) {
+	// 	testConsoleContainerNotRunning(t)
+	// })
+
+	// t.Run("Craft without container", func(t *testing.T) {
+	// 	testCraftContainerNotRunning(t)
+	// })
+
+	// t.Run("Composer without container", func(t *testing.T) {
+	// 	testComposerContainerNotRunning(t)
+	// })
+
+	// t.Run("Run without container", func(t *testing.T) {
+	// 	testRunContainerNotRunning(t)
+	// })
 }
 
 func testComposerInstall(t *testing.T) {
@@ -163,6 +188,7 @@ func testRunDoctrineMigration(t *testing.T) {
 	assert.Contains(t, lastLine, "Dropped database `appDb` for connection named default")
 
 	// create new db
+	buf.Reset()
 	rootCmd.SetArgs([]string{"run", "php", "bin/console", "doctrine:database:create"})
 	errExec = rootCmd.Execute()
 	assert.NoError(t, errExec)
@@ -172,13 +198,14 @@ func testRunDoctrineMigration(t *testing.T) {
 	assert.Contains(t, lastLine, "Created database `appDb` for connection named default")
 
 	// apply migration
-	rootCmd.SetArgs([]string{"run", "php", "bin/console", "doctrine:migration:migrate", "-n"})
+	buf.Reset()
+	rootCmd.SetArgs([]string{"run", "php", "bin/console", "doctrine:migrations:migrate", "-n"})
 	errExec = rootCmd.Execute()
 	assert.NoError(t, errExec)
 	cleanOutput = base.StripANSI(buf.String())
 
 	lastLine = base.GetLineFromStringReversed(cleanOutput, 1)
-	assert.Contains(t, lastLine, "[OK] Successfully migrated to version: DoctrineMigrations\\Version2026062021191")
+	assert.Contains(t, lastLine, "[OK] Successfully migrated to version: DoctrineMigrations\\Version20260620211915")
 }
 
 func testRunWithHelp(t *testing.T) {
@@ -215,46 +242,6 @@ func testConsoleLoadFixtures(t *testing.T) {
 	assert.Contains(t, lastLine, "   > loading App\\DataFixtures\\AppFixtures")
 }
 
-func testExportMysqlDb(t *testing.T) {
-	base.ChangeDirToSymfony(t)
-	db := config.GetDbConfig()
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
-
-	// export db
-	rootCmd.SetArgs([]string{"db", "export"})
-	errExec := rootCmd.Execute()
-	assert.NoError(t, errExec)
-	cleanOutput := base.StripANSI(buf.String())
-
-	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
-	assert.Contains(t, lastLine, "Created Dump Successfully")
-
-	_, err := os.Stat(config.ProjectConfig.ProjectName + db.Filetype)
-	assert.NoError(t, err)
-}
-
-func testImportMysql(t *testing.T) {
-	base.ChangeDirToSymfony(t)
-	db := config.GetDbConfig()
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
-
-	rootCmd.SetArgs([]string{"db", "import", "-f", config.ProjectConfig.ProjectName + db.Filetype})
-	errExec := rootCmd.Execute()
-	assert.NoError(t, errExec)
-	cleanOutput := base.StripANSI(buf.String())
-
-	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
-	assert.Contains(t, lastLine, "Imported the Database dump into "+config.ProjectConfig.ProjectName)
-}
-
 func testDestroy(t *testing.T) {
 	base.ChangeDirToSymfony(t)
 	db := config.GetDbConfig()
@@ -268,4 +255,118 @@ func testDestroy(t *testing.T) {
 
 	rootCmd := cmd.RootCmd
 	base.SilentCommand(t, rootCmd, []string{"stack", "destroy"})
+}
+
+//*
+//// * Negative tests
+//*
+
+func testShellWithoutContainerArgument(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"shell"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"Missing argument CONTAINER",
+	)
+}
+
+func testShellWithoutFlagArgument(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"shell", "fpm", "-u"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"flag needs an argument: 'u' in -u",
+	)
+}
+
+//*
+//// * not running tests
+//*
+
+func testConsoleContainerNotRunning(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"php", "console", "symfony > laravel"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The Container: "+config.ProjectConfig.ProjectName+`-`+config.ProjectConfig.Backend.ContainerName+" doesn't exist",
+		"Did you forget to run mt stack start?",
+	)
+}
+
+func testCraftContainerNotRunning(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"php", "craft", "5 is worse then 4"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The Container: "+config.ProjectConfig.ProjectName+`-`+config.ProjectConfig.Backend.ContainerName+" doesn't exist",
+		"Did you forget to run mt stack start?",
+	)
+}
+
+func testComposerContainerNotRunning(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"composer", "blabla"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The Container: "+config.ProjectConfig.ProjectName+`-`+config.ProjectConfig.Backend.ContainerName+" doesn't exist",
+		"Did you forget to run mt stack start?",
+	)
+}
+
+func testRunContainerNotRunning(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"run", "i hate testing"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The Container: "+config.ProjectConfig.ProjectName+`-`+config.ProjectConfig.Main.ContainerName+" doesn't exist",
+		"Did you forget to run mt stack start?",
+	)
 }

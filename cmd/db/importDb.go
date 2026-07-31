@@ -33,14 +33,26 @@ var importDbCmd = &cobra.Command{
 			var err error
 			importFile, err = form.FilePicker(".")
 			if err != nil {
-				fmt.Fprintf(out, "\033[31mError: %s\033[0m \n", err)
-				os.Exit(1)
+				return fmt.Errorf("%s", err)
 			}
 
 		}
+
+		if importFile == "file" && len(args) > 0 {
+			importFile = args[0]
+		}
+		_, err := os.Stat(importFile)
+		if err != nil {
+			return fmt.Errorf("The to be imported file doesn't exist: %s \nPlease choose a other file", importFile)
+		}
+
 		fmt.Fprintln(out, importFile)
 
-		importExecute(out, importFile)
+		importErr := importExecute(out, importFile)
+		if importErr != nil {
+			return importErr
+		}
+
 		return nil
 	},
 }
@@ -59,12 +71,15 @@ func init() {
 	})
 }
 
-func importExecute(out io.Writer, file string) {
+func importExecute(out io.Writer, file string) error {
 	var projectName string = config.ProjectConfig.ProjectName
-	basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
+
+	containerErr := basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
+	if containerErr != nil {
+		return containerErr
+	}
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
-	fmt.Fprintln(out, "")
 
 	// copy
 	copy := copyImportGen(out, file) //exec.Command("docker", "cp", "./"+file, projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype)
@@ -88,6 +103,8 @@ func importExecute(out io.Writer, file string) {
 	rmCmd.Output()
 
 	fmt.Fprintf(out, text.Green("Imported the Database dump into %s\n"), projectName)
+
+	return nil
 }
 
 func importGen(out io.Writer, file string) []string {

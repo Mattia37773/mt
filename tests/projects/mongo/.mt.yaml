@@ -5,12 +5,12 @@
 # Docker Compose Project Configuration
 #projectCompose:
 # paths relative to project root
-projectName: mongotest
+projectName: mongo
 paths:
   dockerCompose: docker/docker-compose.yaml
   env: .env
 db:
-  containerName: "db"
+  containerName: "mongo"
   provider: "mongo"
   name: "appDb"
   password: ${DB_PASSWORD}

@@ -1,16 +1,16 @@
-# endto end tests: make test TEST=tests
+- test normal
+  - config file content
+  - error messages
 
-- singles
-  - npm
-  - config
+- e2e
+  - config file generation
+
+- commands
   - update
-  - yarn
 
-- test
-  - all
-- e2e + test with builded binary + should maybe be isolated from other app parts
-  - mutliple test profile
-- external
+- other
+  - golang ci for linting
+
+- release
+  - goreleaser
   - all with already compiled binary
-- golang ci for linting
-- goreleaser

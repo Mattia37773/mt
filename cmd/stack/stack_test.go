@@ -7,7 +7,8 @@ import (
 	"github.com/mattia37773/mt/cmd"
 	"github.com/mattia37773/mt/config"
 	_ "github.com/mattia37773/mt/helper/basecmd"
-	"github.com/mattia37773/mt/tests/base"
+	base "github.com/mattia37773/mt/helper/basetest"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +20,7 @@ func TestBuildCommandGenSuccess(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	buildCommand := buildGen(rootCmd.OutOrStdout())
+	buildCommand, _ := buildGen(rootCmd.OutOrStdout())
 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " build --no-cache"}, buildCommand)
 }
 
@@ -32,7 +33,7 @@ func TestStartCommandGenSuccess(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	startCommand := startGen(rootCmd.OutOrStdout())
+	startCommand, _ := startGen(rootCmd.OutOrStdout())
 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " up -d"}, startCommand)
 }
 
@@ -44,7 +45,7 @@ func TestDestroyCommandGenSuccess(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	destroyCommand := destroyGen(rootCmd.OutOrStdout())
+	destroyCommand, _ := destroyGen(rootCmd.OutOrStdout())
 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " down -v --rmi all"}, destroyCommand)
 }
 
@@ -56,7 +57,7 @@ func TestPsCommandGenSuccess(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	psCommand := psGen(rootCmd.OutOrStdout())
+	psCommand, _ := psGen(rootCmd.OutOrStdout())
 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " ps"}, psCommand)
 }
 
@@ -68,7 +69,7 @@ func TestRestartCommandGenSuccess(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	restartCommand := restartGen(rootCmd.OutOrStdout())
+	restartCommand, _ := restartGen(rootCmd.OutOrStdout())
 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " restart"}, restartCommand)
 }
 
@@ -80,6 +81,6 @@ func TestStopCommandGenSuccess(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	stopCommand := stopGen(rootCmd.OutOrStdout())
+	stopCommand, _ := stopGen(rootCmd.OutOrStdout())
 	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " down"}, stopCommand)
 }

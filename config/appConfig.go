@@ -10,22 +10,22 @@ import (
 	"os"
 )
 
+// config that can be overridden by ldflags
 var (
 	Version       = "dev"
 	BuildMethod   = "source"
-	LatestVersion = getNewestCliVersionFunction(AppConfig.Version)
+	LatestVersion = getNewestCliVersionFunction(Version)
 	Environment   = "dev"
 )
 
+// static config
 var AppConfig = struct {
-	Version       string
 	BuildMethod   string
 	ModulePath    string
 	GithubUrl     string
 	GithubBaseApi string
 	Logo          string
 }{
-	Version:       Version,
 	BuildMethod:   BuildMethod,
 	ModulePath:    "github.com/mattia37773/mt",
 	GithubUrl:     "https://github.com/mattia37773/mt",

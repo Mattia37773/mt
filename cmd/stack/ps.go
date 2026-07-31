@@ -17,11 +17,16 @@ var psCmd = &cobra.Command{
 	Short:                 "Show stack status",
 	GroupID:               "stack",
 	DisableFlagsInUseLine: true,
-	Run: func(c *cobra.Command, args []string) {
+	RunE: func(c *cobra.Command, args []string) error {
 		out := c.OutOrStdout()
 
-		cmd := psGen(out)
+		cmd, err := psGen(out)
+		if err != nil {
+			return err
+		}
 		basecmd.StackExecute(out, cmd, "")
+
+		return nil
 	},
 }
 
@@ -29,9 +34,16 @@ func init() {
 	StackCmd.AddCommand(psCmd)
 }
 
-func psGen(out io.Writer) []string {
-	var projectName string = basecmd.ValidateProjectName(out)
-	var dockerPath string = basecmd.ValidateDockerPath(out)
+func psGen(out io.Writer) ([]string, error) {
+	projectName, err := basecmd.ValidateProjectName(out)
+	if err != nil {
+		return []string{}, err
+	}
+
+	dockerPath, err := basecmd.ValidateDockerPath(out)
+	if err != nil {
+		return []string{}, err
+	}
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
@@ -39,5 +51,5 @@ func psGen(out io.Writer) []string {
 
 	execArgs := fmt.Sprintf("docker compose -f %s ps", dockerPath)
 
-	return []string{"sh", "-c", execArgs}
+	return []string{"sh", "-c", execArgs}, nil
 }

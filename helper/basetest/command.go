@@ -15,13 +15,16 @@ func SilentCommand(t *testing.T, cmd *cobra.Command, args []string) {
 	devNull, _ := os.OpenFile(os.DevNull, os.O_WRONLY, 0)
 	os.Stdout, os.Stderr = devNull, devNull
 
+	defer func() {
+		os.Stdout, os.Stderr = oldStdout, oldStderr
+		devNull.Close()
+	}()
+
 	cmd.SetOut(io.Discard)
 	cmd.SetErr(io.Discard)
 
 	cmd.SetArgs(args)
 	err := cmd.Execute()
 
-	os.Stdout, os.Stderr = oldStdout, oldStderr
-	devNull.Close()
 	assert.NoError(t, err)
 }

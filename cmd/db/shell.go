@@ -17,11 +17,21 @@ var shellCmd = &cobra.Command{
 	Short:                 "Connect to the database",
 	GroupID:               "db",
 	DisableFlagsInUseLine: true,
-	Run: func(c *cobra.Command, args []string) {
+	RunE: func(c *cobra.Command, args []string) error {
 		out := c.OutOrStdout()
 
-		cmd := shellGen(out, args)
+		containerErr := basecmd.CheckContainerExits(out, config.ProjectConfig.ProjectName+"-"+config.ProjectConfig.DB.ContainerName)
+		if containerErr != nil {
+			return containerErr
+		}
+
+		cmd, err := shellGen(out, args)
+		if err != nil {
+			return err
+		}
+
 		basecmd.ExecuteCommand(out, cmd)
+		return nil
 	},
 }
 
@@ -29,6 +39,6 @@ func init() {
 	DbCmd.AddCommand(shellCmd)
 }
 
-func shellGen(out io.Writer, args []string) []string {
+func shellGen(out io.Writer, args []string) ([]string, error) {
 	return basecmd.ExecuteDbCommand(out, config.GetDbConfig().Shell, args)
 }

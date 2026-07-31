@@ -5,7 +5,7 @@
 # ==============================================================================
 
 # Directories to monitor (Space-separated)
-WATCH_DIRS=("cmd" "functions" "config")
+WATCH_DIRS=("cmd" "helper" "config")
 
 # Files or extensions to ignore (Regex)
 IGNORE_PATTERN="\.tmp$|\.log$"

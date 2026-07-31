@@ -22,12 +22,16 @@ var shellCmd = &cobra.Command{
 	DisableFlagsInUseLine: true,
 	RunE: func(c *cobra.Command, args []string) error {
 		if len(args) < 1 {
-			return fmt.Errorf("Error: Missing argument CONTAINER")
+			return fmt.Errorf("Missing argument CONTAINER")
 		}
 
 		user, _ := c.Flags().GetString("user")
 
-		cmd := shellGen(c.OutOrStdout(), user, args)
+		cmd, err := shellGen(c.OutOrStdout(), user, args)
+		if err != nil {
+			return err
+		}
+
 		basecmd.ExecuteHostCommand(c.OutOrStdout(), cmd)
 		return nil
 	},
@@ -38,12 +42,19 @@ func init() {
 	shellCmd.Flags().StringP("user", "u", "", "User to Connect to the Container")
 }
 
-func shellGen(out io.Writer, user string, args []string) []string {
-	var projectName string = basecmd.ValidateProjectName(out)
+func shellGen(out io.Writer, user string, args []string) ([]string, error) {
+	projectName, err := basecmd.ValidateProjectName(out)
+	if err != nil {
+		return []string{}, err
+	}
+
 	var container string = args[0]
 
 	if config.Environment != "test" {
-		basecmd.CheckContainerExits(out, projectName+"-"+container)
+		containerErr := basecmd.CheckContainerExits(out, projectName+"-"+container)
+		if containerErr != nil {
+			return nil, containerErr
+		}
 	}
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
@@ -58,5 +69,5 @@ func shellGen(out io.Writer, user string, args []string) []string {
 		execArgs = fmt.Sprintf("docker exec -it %s-%s $(docker exec %s-%s sh -c 'command -v bash || echo /bin/sh')", projectName, container, projectName, container)
 	}
 
-	return []string{"sh", "-c", execArgs}
+	return []string{"sh", "-c", execArgs}, nil
 }

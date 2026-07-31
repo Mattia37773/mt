@@ -6,6 +6,7 @@ package php
 import (
 	"io"
 
+	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
 	"github.com/spf13/cobra"
 )
@@ -16,11 +17,21 @@ var craftCmd = &cobra.Command{
 	GroupID:               "php",
 	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
-	Run: func(c *cobra.Command, args []string) {
+	RunE: func(c *cobra.Command, args []string) error {
 		out := c.OutOrStdout()
 
-		cmd := craftGen(out, args)
+		containerErr := basecmd.CheckContainerExits(out, config.ProjectConfig.ProjectName+"-"+config.ProjectConfig.Backend.ContainerName)
+		if containerErr != nil {
+			return containerErr
+		}
+
+		cmd, err := craftGen(out, args)
+		if err != nil {
+			return err
+		}
+
 		basecmd.ExecuteCommand(out, cmd)
+		return nil
 	},
 }
 
@@ -28,6 +39,6 @@ func init() {
 	PhpCmd.AddCommand(craftCmd)
 }
 
-func craftGen(out io.Writer, args []string) []string {
+func craftGen(out io.Writer, args []string) ([]string, error) {
 	return basecmd.ExecuteBackendCommand(out, "php craft", args)
 }

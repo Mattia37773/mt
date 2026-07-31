@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/mattia37773/mt/cmd"
-	"github.com/mattia37773/mt/tests/base"
+	base "github.com/mattia37773/mt/helper/basetest"
 
 	_ "github.com/mattia37773/mt/cmd/db"
 	_ "github.com/mattia37773/mt/cmd/php"
@@ -32,6 +32,8 @@ func TestHelpStyle(t *testing.T) {
 
 	assert.Contains(t, cleanOutput, "completion  Generate the autocompletion script for the specified shell")
 
+	assert.Contains(t, cleanOutput, "composer    Run Composer inside in a container")
+	assert.Contains(t, cleanOutput, "config      Generate the default config file")
 	assert.Contains(t, cleanOutput, "db          Manage the local database")
 	assert.Contains(t, cleanOutput, "help        Shows the help text for an command")
 	assert.Contains(t, cleanOutput, "php         Run some popular PHP tasks")
@@ -58,4 +60,23 @@ func TestCommandNotFound(t *testing.T) {
 	assert.Error(t, err)
 
 	assert.ErrorContains(t, err, `unknown command "xyz" for "mt"`)
+}
+
+func TestConfigHelp(t *testing.T) {
+	buf := new(bytes.Buffer)
+
+	rootCmd := cmd.RootCmd
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+	rootCmd.SetArgs([]string{"config", "--help"})
+
+	err := rootCmd.Execute()
+	assert.NoError(t, err)
+
+	cleanOutput := base.StripANSI(buf.String())
+
+	assert.Contains(t, cleanOutput, "Usage: mt config")
+	assert.Contains(t, cleanOutput, "Generate the default config file")
+	assert.Contains(t, cleanOutput, "Flags:")
+	assert.Contains(t, cleanOutput, "-h, --help   help for config")
 }

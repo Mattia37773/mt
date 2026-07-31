@@ -1,0 +1,208 @@
+package e2e
+
+import (
+	"bytes"
+	"testing"
+
+	"github.com/mattia37773/mt/cmd"
+	"github.com/mattia37773/mt/config"
+	base "github.com/mattia37773/mt/helper/basetest"
+	"github.com/mattia37773/mt/helper/docker"
+	"github.com/stretchr/testify/assert"
+)
+
+func TestPlainContainer(t *testing.T) {
+	// t.Run("Start Debian Stack", func(t *testing.T) {
+	// 	testStartDebianStack(t)
+	// })
+
+	//*
+	//// * db
+	//*
+
+	// t.Run("Mysql shell command not found", func(t *testing.T) {
+	// 	testMysqlShellCommandNotFound(t)
+	// })
+
+	// t.Run("Mysql export command not found", func(t *testing.T) {
+	// 	testMysqlExportCommandNotFound(t)
+	// })
+
+	// TODO import command
+
+	//*
+	//// * php
+	//*
+
+	// t.Run("Console command not found", func(t *testing.T) {
+	// 	testConsoleCommandNotFound(t)
+	// })
+
+	// t.Run("Craft command not found", func(t *testing.T) {
+	// 	testCraftCommandNotFound(t)
+	// })
+
+	// *
+	//// * single
+	// *
+
+	// t.Run("Compser command not found", func(t *testing.T) {
+	// 	testComposerCommandNotFound(t)
+	// })
+
+	// t.Run("Run command not found", func(t *testing.T) {
+	// 	testRunCommandNotFound(t)
+	// })
+
+}
+
+func testStartDebianStack(t *testing.T) {
+	base.ChangeDirToDefault(t)
+
+	rootCmd := cmd.RootCmd
+	base.SilentCommand(t, rootCmd, []string{"stack", "start"})
+
+	expectedContainers := []string{
+		config.ProjectConfig.ProjectName + "-" + config.ProjectConfig.DB.ContainerName,
+	}
+
+	for _, container := range expectedContainers {
+		t.Run("Check_Container_"+container, func(t *testing.T) {
+			running := docker.IsContainerRunning(container)
+			assert.True(t, running, "The Container '%s'should run but doesn't", container)
+		})
+	}
+}
+
+//*
+//// * db
+//*
+
+func testMysqlShellCommandNotFound(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"db", "shell"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The command: mysql -u"+config.ProjectConfig.DB.User+" -p"+config.ProjectConfig.DB.Password+" isn't available inside the "+config.ProjectConfig.DB.ContainerName,
+	)
+}
+
+func testMysqlExportCommandNotFound(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"db", "export"})
+	errExec := rootCmd.Execute()
+	t.Log(errExec)
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The command: mysqldump -u"+config.ProjectConfig.DB.User+" -p"+config.ProjectConfig.DB.Password+" "+config.ProjectConfig.DB.Name+" > /tmp/nixy.sql isn't available inside the "+config.ProjectConfig.DB.ContainerName,
+	)
+}
+
+//*
+//// * php
+//*
+
+func testConsoleCommandNotFound(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"php", "console"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The command: bin/console isn't available inside the "+config.ProjectConfig.DB.ContainerName,
+	)
+}
+
+func testCraftCommandNotFound(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"php", "craft"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The command: php craft isn't available inside the "+config.ProjectConfig.DB.ContainerName,
+	)
+}
+
+//*
+//// * single
+//*
+
+func testComposerCommandNotFound(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"composer"})
+	errExec := rootCmd.Execute()
+
+	assert.Error(t, errExec)
+	assert.Contains(t, errExec.Error(),
+		"The command: composer isn't available inside the "+config.ProjectConfig.DB.ContainerName,
+	)
+}
+
+func testRunCommandNotFound(t *testing.T) {
+	base.ChangeDirToDefault(t)
+	rootCmd := cmd.RootCmd
+
+	buf := new(bytes.Buffer)
+	rootCmd.SetOut(buf)
+	rootCmd.SetErr(buf)
+
+	rootCmd.SetArgs([]string{"run", "olive"})
+	errExec := rootCmd.Execute()
+	assert.NoError(t, errExec)
+	cleanOutput := base.StripANSI(buf.String())
+
+	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
+	assert.Contains(t, lastLine, "sh: 1: olive: not found")
+}
+
+// func test CommandNotFound(t *testing.T) {
+// 	base.ChangeDirToDefault(t)
+// 	rootCmd := cmd.RootCmd
+
+// 	buf := new(bytes.Buffer)
+// 	rootCmd.SetOut(buf)
+// 	rootCmd.SetErr(buf)
+
+// 	rootCmd.SetArgs([]string{"db", "shell"})
+// 	errExec := rootCmd.Execute()
+
+// 	assert.Error(t, errExec)
+// 	assert.Contains(t, errExec.Error(),
+// 		"The Container: "+config.ProjectConfig.ProjectName+`-`+config.ProjectConfig.DB.ContainerName+" doesn't exist",
+// 		"Did you forget to run mt stack start?",
+// 	)
+// }
