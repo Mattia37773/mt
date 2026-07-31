@@ -1,7 +1,7 @@
-name: ${COMPOSE_PROJECT_NAME}
+name: ${COMPOSE_MYSQL_NAME}
 services:
   db:
-    container_name: ${COMPOSE_PROJECT_NAME}-db
+    container_name: ${COMPOSE_MYSQL_NAME}-db
     image: mysql:8.4
     restart: always
     environment:
@@ -13,7 +13,7 @@ services:
       - "3306:3306"
     volumes:
       - db-data:/var/lib/mysql
-      - ./mysql/init:/docker-entrypoint-initdb.d
+      #- ./mysql/init:/docker-entrypoint-initdb.d
     networks:
       - app-network
 

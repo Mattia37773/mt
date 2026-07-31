@@ -24,13 +24,16 @@ watch: ## Recompile on filechange
 
 build: ## Build the binary
 	GIT_TAG=$(GIT_TAG) go build -ldflags="\
-		-X '$(MODULE_PATH)/$(APP_NAME)/config.Version=$(GIT_TAG)' \
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=$(GIT_TAG)' \
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.BuildMethod=$(BUILD_METHOD)' \
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=$(APP_ENV)'"
 
 test: ## Run the testsuite
 	go clean -cache
-	go test -v ./cmd/... -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'" ./...  | grep -v '\[no test files\]'
+	go test -v ./cmd/... -ldflags="\
+	-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'\
+	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
+	" ./...  | grep -v '\[no test files\]'
 
 test-all: ## Run the testsuite with showing directories without tests
 	go clean -cache
@@ -47,6 +50,9 @@ test-cover: ## Show the test coverage
 e2e: check-docker-compose  ## run the E2E tests
 	go clean -cache
 	go test -v ./tests/e2e/... -ldflags="-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=dev'" ./...  | grep -v '\[no test files\]'
+
+clear-docker: ## This remvoes everything in docker! from all namespaces
+	docker system prune -a --volumes -f
 
 check-docker-compose:
 	@if ! docker compose version >/dev/null 2>&1; then \

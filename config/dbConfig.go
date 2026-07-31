@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package config
 
 import (
@@ -40,6 +43,7 @@ func GetDbConfig() DbConfig {
 	allowdTypes := []string{"mysql", "mongo"}
 	if !slices.Contains(allowdTypes, dbType) {
 		fmt.Printf("\033[31mIError: nvalid Argument %s is not a supported DB. Choose a supported db type %s file\033[0m \n", dbType, allowdTypes)
+		// TODO remove exit & return error instead
 		os.Exit(1)
 	}
 

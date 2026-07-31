@@ -1,13 +1,10 @@
-name: ${COMPOSE_PROJECT_NAME}
+name: ${COMPOSE_DEAULT_NAME}
 services:
   db:
-    container_name: ${COMPOSE_PROJECT_NAME}-fpm
+    container_name: ${COMPOSE_DEAULT_NAME}-fpm
     image: debian:bookworm
     restart: always
     command: sleep infinity
-    ports:
-      - "3306:3306"
-      - "8080:8080"
     networks:
       - app-network
 

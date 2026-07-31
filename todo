@@ -1,16 +1,19 @@
-- test normal
-  - config file content
-  - error messages
+TODO
 
-- e2e
-  - config file generation
+- update
 
-- commands
-  - update
+- golang ci for linting
 
-- other
-  - golang ci for linting
+- readme
 
-- release
-  - goreleaser
-  - all with already compiled binary
+- before release
+  - tests
+  - goreleaser build
+  - vhs gif gen
+
+- opening merge request
+- linting
+- tests
+-
+
+- windows testing

@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package e2e
 
 import (
@@ -6,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/mattia37773/mt/cmd"
 	_ "github.com/mattia37773/mt/cmd/db"
@@ -18,55 +22,55 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// func TestDbMongo(t *testing.T) {
-// 	t.Run("Start", func(t *testing.T) {
-// 		testStartMongoStack(t)
-// 		time.Sleep(30 * time.Second)
-// 	})
+func TestDbMongo(t *testing.T) {
+	t.Run("Start", func(t *testing.T) {
+		testStartMongoStack(t)
+		time.Sleep(30 * time.Second)
+	})
 
-// 	t.Run("Mongo data exist after container creation", func(t *testing.T) {
-// 		testMongoDataExists(t)
-// 	})
+	t.Run("Mongo data exist after container creation", func(t *testing.T) {
+		testMongoDataExists(t)
+	})
 
-// 	t.Run("Db export Mysql", func(t *testing.T) {
-// 		testExportMongoDb(t)
-// 	})
+	t.Run("Db export Mysql", func(t *testing.T) {
+		testExportMongoDb(t)
+	})
 
-// 	t.Run("Mongo import", func(t *testing.T) {
-// 		testMongoImport(t)
-// 	})
+	t.Run("Mongo import", func(t *testing.T) {
+		testMongoImport(t)
+	})
 
-// 	t.Run("Mongo data exist after import", func(t *testing.T) {
-// 		testMongoDataExists(t)
-// 	})
+	t.Run("Mongo data exist after import", func(t *testing.T) {
+		testMongoDataExists(t)
+	})
 
-// 	// negative tests
+	// negative tests
 
-// 	t.Run("Mysql import File Doesnt exist", func(t *testing.T) {
-// 		testMongoImportNoFileGiven(t)
-// 	})
+	t.Run("Mysql import File Doesnt exist", func(t *testing.T) {
+		testMongoImportNoFileGiven(t)
+	})
 
-// 	t.Run("Mongo import without file", func(t *testing.T) {
-// 		testMongoImportFileDoesntExist(t)
-// 	})
+	t.Run("Mongo import without file", func(t *testing.T) {
+		testMongoImportFileDoesntExist(t)
+	})
 
-// 	// destroy everything
-// 	t.Run("Mongo stack destroy", func(t *testing.T) {
-// 		testDestroyMongo(t)
-// 	})
+	// destroy everything
+	t.Run("Mongo stack destroy", func(t *testing.T) {
+		testDestroyMongo(t)
+	})
 
-// 	// // negative test with destroyed container
-// 	t.Run("Mongo import contianer not running", func(t *testing.T) {
-// 		testMongoImportContainerNotRunning(t)
-// 	})
+	// egative test with destroyed container
+	t.Run("Mongo import contianer not running", func(t *testing.T) {
+		testMongoImportContainerNotRunning(t)
+	})
 
-// 	t.Run("Mongo export contianer not running", func(t *testing.T) {
-// 		testMongoExportContainerNotRunning(t)
-// 	})
-// 	t.Run("Mongo shell contianer not running", func(t *testing.T) {
-// 		testMongoShellContainerNotRunning(t)
-// 	})
-// }
+	t.Run("Mongo export contianer not running", func(t *testing.T) {
+		testMongoExportContainerNotRunning(t)
+	})
+	t.Run("Mongo shell contianer not running", func(t *testing.T) {
+		testMongoShellContainerNotRunning(t)
+	})
+}
 
 func testStartMongoStack(t *testing.T) {
 	base.ChangeDirToMongo(t)

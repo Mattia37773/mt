@@ -8,14 +8,16 @@ import (
 	"errors"
 	"net/http"
 	"os"
+	"runtime/debug"
 )
 
 // config that can be overridden by ldflags
 var (
-	Version       = "dev"
-	BuildMethod   = "source"
-	LatestVersion = getNewestCliVersionFunction(Version)
-	Environment   = "dev"
+	Version                = getCurrentVersion()
+	OverrideCurrentVersion = ""
+	BuildMethod            = "source"
+	LatestVersion          = getNewestCliVersionFunction(Version)
+	Environment            = "dev"
 )
 
 // static config
@@ -38,6 +40,23 @@ var AppConfig = struct {
 ██║ ╚═╝ ██║    ██║
 ╚═╝     ╚═╝    ╚═╝
 `,
+}
+
+func init() {
+	getCurrentVersion()
+}
+func getCurrentVersion() string {
+
+	if OverrideCurrentVersion != "" {
+		return OverrideCurrentVersion
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "dev"
+	}
+
+	return info.Main.Version
 }
 
 func getNewestCliVersionFunction(currentVersion string) string {

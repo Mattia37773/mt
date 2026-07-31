@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package basecmd
 
 import (
@@ -60,7 +63,7 @@ func BaseCommandGen(out io.Writer, baseCommand string, container string, checkCo
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
-	fmt.Printf("Running %s in %s-%s \n", cmdStr, projectName, container)
+	fmt.Fprintf(out, "Running %s in %s-%s \n", cmdStr, projectName, container)
 
 	// checks if the terminal has a tty
 	execArgs := []string{"exec"}

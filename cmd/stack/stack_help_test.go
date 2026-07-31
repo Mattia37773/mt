@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package stack
 
 import (
@@ -26,7 +29,6 @@ func TestStackHelp(t *testing.T) {
 	assert.Contains(t, cleanOutput, "Usage: mt stack [command] [flags]")
 	assert.Contains(t, cleanOutput, "Manage the local docker stack")
 	assert.Contains(t, cleanOutput, "Commands:")
-	assert.Contains(t, cleanOutput, "build    Build the Docker stack")
 	assert.Contains(t, cleanOutput, "destroy  Destroy the docker stack")
 	assert.Contains(t, cleanOutput, "logs     Show container logs")
 	assert.Contains(t, cleanOutput, "ps       Show stack status")
@@ -35,25 +37,6 @@ func TestStackHelp(t *testing.T) {
 	assert.Contains(t, cleanOutput, "stop     Stop the local stack")
 	assert.Contains(t, cleanOutput, "Flags:")
 	assert.Contains(t, cleanOutput, "-h, --help   help for stack")
-}
-
-func TestBuildHelp(t *testing.T) {
-	buf := new(bytes.Buffer)
-
-	rootCmd := cmd.RootCmd
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
-	rootCmd.SetArgs([]string{"stack", "build", "--help"})
-
-	err := rootCmd.Execute()
-	assert.NoError(t, err)
-
-	cleanOutput := base.StripANSI(buf.String())
-
-	assert.Contains(t, cleanOutput, "mt stack build")
-	assert.Contains(t, cleanOutput, "Build the Docker stack")
-	assert.Contains(t, cleanOutput, "Flags:")
-	assert.Contains(t, cleanOutput, "-h, --help   help for build")
 }
 
 func TestDestroyHelp(t *testing.T) {

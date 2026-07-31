@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package stack
 
 import (
@@ -11,18 +14,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 )
-
-func TestBuildCommandGenSuccess(t *testing.T) {
-	base.ChangeDirToDefault(t)
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
-
-	buildCommand, _ := buildGen(rootCmd.OutOrStdout())
-	assert.Equal(t, []string{"sh", "-c", "docker compose -f " + config.ProjectConfig.Paths.DockerCompose + " build --no-cache"}, buildCommand)
-}
 
 func TestStartCommandGenSuccess(t *testing.T) {
 

@@ -1,7 +1,7 @@
-name: ${COMPOSE_PROJECT_NAME}
+name: ${COMPOSE_MONGO_NAME}
 services:
   mongo:
-    container_name: ${COMPOSE_PROJECT_NAME}-mongo
+    container_name: ${COMPOSE_MONGO_NAME}-mongo
     image: mongo
     ports:
       - 27017:27017

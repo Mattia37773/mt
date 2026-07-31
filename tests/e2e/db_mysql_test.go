@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package e2e
 
 import (
@@ -5,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+	"time"
 
 	"github.com/mattia37773/mt/cmd"
 	_ "github.com/mattia37773/mt/cmd/db"
@@ -18,52 +22,50 @@ import (
 )
 
 func TestDbMysql(t *testing.T) {
-	// t.Run("Start", func(t *testing.T) {
-	// 	testStartMysqlStack(t)
-	// 	time.Sleep(30 * time.Second)
-	// })
+	t.Run("Start", func(t *testing.T) {
+		testStartMysqlStack(t)
+		time.Sleep(30 * time.Second)
+	})
 
-	// t.Run("Mysql data exist after container creation", func(t *testing.T) {
-	// 	testMysqlDataExists(t)
-	// })
+	t.Run("Db import mysql", func(t *testing.T) {
+		testImportMysql(t)
+	})
 
-	// t.Run("Db export Mysql", func(t *testing.T) {
-	// 	testExportMysqlDb(t)
-	// })
+	t.Run("Mysql data exist after import", func(t *testing.T) {
+		testMysqlDataExists(t)
+	})
 
-	// t.Run("Db import mysql", func(t *testing.T) {
-	// 	testImportMysql(t)
-	// })
-	// t.Run("Mysql data exist after import", func(t *testing.T) {
-	// 	testMysqlDataExists(t)
-	// })
+	t.Run("Db export Mysql", func(t *testing.T) {
+		testExportMysqlDb(t)
+	})
 
-	// negative tests
+	// * negative tests
 
-	// t.Run("Mysql import File Doesnt exist", func(t *testing.T) {
-	// 	testMysqlImportNoFileGiven(t)
-	// })
+	t.Run("Mysql import File Doesnt exist", func(t *testing.T) {
+		testMysqlImportNoFileGiven(t)
+	})
 
-	// t.Run("Mysql import without file", func(t *testing.T) {
-	// 	testMysqlImportFileDoesntExist(t)
-	// })
+	t.Run("Mysql import without file", func(t *testing.T) {
+		testMysqlImportFileDoesntExist(t)
+	})
 
-	// destroy everything
-	// t.Run("Mysql stack destroy", func(t *testing.T) {
-	// 	testDestroyMysql(t)
-	// })
+	// * destroy everything
 
-	// // negative test with destroyed container
-	// t.Run("Mysql import contianer not running", func(t *testing.T) {
-	// 	testMysqlImportContainerNotRunning(t)
-	// })
+	t.Run("Mysql stack destroy", func(t *testing.T) {
+		testDestroyMysql(t)
+	})
 
-	// t.Run("Mysql export contianer not running", func(t *testing.T) {
-	// 	testMysqlExportContainerNotRunning(t)
-	// })
-	// t.Run("Mysql shell contianer not running", func(t *testing.T) {
-	// 	testMysqlShellContainerNotRunning(t)
-	// })
+	// * negative test with destroyed container
+	t.Run("Mysql import contianer not running", func(t *testing.T) {
+		testMysqlImportContainerNotRunning(t)
+	})
+
+	t.Run("Mysql export contianer not running", func(t *testing.T) {
+		testMysqlExportContainerNotRunning(t)
+	})
+	t.Run("Mysql shell contianer not running", func(t *testing.T) {
+		testMysqlShellContainerNotRunning(t)
+	})
 }
 
 func testStartMysqlStack(t *testing.T) {
@@ -115,7 +117,7 @@ func testImportMysql(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	rootCmd.SetArgs([]string{"db", "import", "-f", config.ProjectConfig.ProjectName + db.Filetype})
+	rootCmd.SetArgs([]string{"db", "import", "-f", "backup" + db.Filetype})
 	errExec := rootCmd.Execute()
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
@@ -205,7 +207,7 @@ func testMysqlImportContainerNotRunning(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	rootCmd.SetArgs([]string{"db", "import", "-f", "snippy.sql"})
+	rootCmd.SetArgs([]string{"db", "import", "-f", "backup.sql"})
 	errExec := rootCmd.Execute()
 
 	assert.Error(t, errExec)

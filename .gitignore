@@ -14,6 +14,7 @@
 
 # Local Build Binary
 mt
+.mt.yaml
 
 # Dependencies
 /vendor

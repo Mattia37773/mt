@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package db
 
 import (

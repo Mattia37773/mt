@@ -83,6 +83,7 @@ func errorMessage(err error) {
 
 	fmt.Println()
 	fmt.Println(text.GlowPink("Try mt --help for usage."))
+	// TODO remvoe exit?
 	os.Exit(1)
 }
 

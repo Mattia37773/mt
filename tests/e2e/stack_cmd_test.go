@@ -1,8 +1,10 @@
+/*
+Copyright © 2026 Matze
+*/
 package e2e
 
 import (
 	"bytes"
-	"os/exec"
 	"testing"
 	"time"
 
@@ -16,64 +18,39 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStack(t *testing.T) {
-	// t.Run("Build", func(t *testing.T) {
-	// 	testBuildCmd(t)
-	// })
+func testStack(t *testing.T) {
 
-	// t.Run("Start", func(t *testing.T) {
-	// 	testStartCmd(t)
-	// })
+	t.Run("Start", func(t *testing.T) {
+		testStartCmd(t)
+	})
 
-	// t.Run("Restart", func(t *testing.T) {
-	// 	testRestartCmd(t)
-	// })
+	t.Run("Restart", func(t *testing.T) {
+		testRestartCmd(t)
+	})
 
-	// t.Run("Ps", func(t *testing.T) {
-	// 	testPsCmd(t)
-	// })
+	t.Run("Ps", func(t *testing.T) {
+		testPsCmd(t)
+	})
 
-	// t.Run("Logs", func(t *testing.T) {
-	// 	testLogsCmd(t)
-	// })
+	t.Run("Logs", func(t *testing.T) {
+		testLogsCmd(t)
+	})
 
-	// t.Run("Fpm Logs", func(t *testing.T) {
-	// 	testLogsCmdSpecificContainer(t)
-	// })
+	t.Run("Fpm Logs", func(t *testing.T) {
+		testLogsCmdSpecificContainer(t)
+	})
 
-	// t.Run("Stop", func(t *testing.T) {
-	// 	testStopCmd(t)
-	// })
+	t.Run("Stop", func(t *testing.T) {
+		testStopCmd(t)
+	})
 
-	// t.Run("StartAgain", func(t *testing.T) {
-	// 	testStartCmd(t)
-	// })
+	t.Run("StartAgain", func(t *testing.T) {
+		testStartCmd(t)
+	})
 
-	// t.Run("Destory", func(t *testing.T) {
-	// 	testDestroyCmd(t)
-	// })
-}
-
-func testBuildCmd(t *testing.T) {
-	base.ChangeDirToSymfony(t)
-
-	rootCmd := cmd.RootCmd
-	base.SilentCommand(t, rootCmd, []string{"stack", "build"})
-
-	expectedImages := []string{
-		config.ProjectConfig.ProjectName + "-fpm:latest",
-	}
-
-	for _, img := range expectedImages {
-		t.Run("Check_Image_"+img, func(t *testing.T) {
-			exists := docker.ImageExists(img)
-			assert.True(t, exists, "The dockerimage '%s' but doesn't exist", img)
-			// remove image again
-			cmd := exec.Command("docker", "image", "rm", "-f", img)
-			cmd.Run()
-		})
-	}
-
+	t.Run("Destory", func(t *testing.T) {
+		testDestroyCmd(t)
+	})
 }
 
 func testStartCmd(t *testing.T) {

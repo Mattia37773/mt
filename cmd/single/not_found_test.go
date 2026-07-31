@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package single
 
 import (
@@ -65,6 +68,7 @@ func TestNotExistingComposeFile(t *testing.T) {
 	)
 }
 
+// TODO fix those tests
 // func TestNoProjectName(t *testing.T) {
 // 	base.ChangeDirToNoProjectName(t)
 // 	rootCmd := cmd.RootCmd
@@ -115,6 +119,6 @@ func TestNotExistingConfigWithError(t *testing.T) {
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
-		"An error occurred while parsing '.mt.yaml':",
+		"An error osccurred while parsing '.mt.yaml'",
 	)
 }

@@ -1,3 +1,6 @@
+/*
+Copyright © 2026 Matze
+*/
 package e2e
 
 import (
@@ -5,6 +8,10 @@ import (
 	"testing"
 
 	"github.com/mattia37773/mt/cmd"
+	_ "github.com/mattia37773/mt/cmd/db"
+	_ "github.com/mattia37773/mt/cmd/php"
+	_ "github.com/mattia37773/mt/cmd/single"
+	_ "github.com/mattia37773/mt/cmd/stack"
 	"github.com/mattia37773/mt/config"
 	base "github.com/mattia37773/mt/helper/basetest"
 	"github.com/mattia37773/mt/helper/docker"
@@ -12,47 +19,53 @@ import (
 )
 
 func TestPlainContainer(t *testing.T) {
-	// t.Run("Start Debian Stack", func(t *testing.T) {
-	// 	testStartDebianStack(t)
-	// })
+	t.Run("Start Debian Stack", func(t *testing.T) {
+		testStartDebianStack(t)
+	})
 
 	//*
 	//// * db
 	//*
 
-	// t.Run("Mysql shell command not found", func(t *testing.T) {
-	// 	testMysqlShellCommandNotFound(t)
-	// })
+	t.Run("Mysql shell command not found", func(t *testing.T) {
+		testMysqlShellCommandNotFound(t)
+	})
 
-	// t.Run("Mysql export command not found", func(t *testing.T) {
-	// 	testMysqlExportCommandNotFound(t)
-	// })
-
-	// TODO import command
+	t.Run("Mysql export command not found", func(t *testing.T) {
+		testMysqlExportCommandNotFound(t)
+	})
 
 	//*
 	//// * php
 	//*
 
-	// t.Run("Console command not found", func(t *testing.T) {
-	// 	testConsoleCommandNotFound(t)
-	// })
+	t.Run("Console command not found", func(t *testing.T) {
+		testConsoleCommandNotFound(t)
+	})
 
-	// t.Run("Craft command not found", func(t *testing.T) {
-	// 	testCraftCommandNotFound(t)
-	// })
+	t.Run("Craft command not found", func(t *testing.T) {
+		testCraftCommandNotFound(t)
+	})
 
 	// *
 	//// * single
 	// *
 
-	// t.Run("Compser command not found", func(t *testing.T) {
-	// 	testComposerCommandNotFound(t)
-	// })
+	t.Run("Compser command not found", func(t *testing.T) {
+		testComposerCommandNotFound(t)
+	})
 
-	// t.Run("Run command not found", func(t *testing.T) {
-	// 	testRunCommandNotFound(t)
-	// })
+	t.Run("Run command not found", func(t *testing.T) {
+		testRunCommandNotFound(t)
+	})
+
+	// *
+	//// * destroy
+	// *
+
+	t.Run("Destroy the container", func(t *testing.T) {
+		testDestroyPlainContainer(t)
+	})
 
 }
 
@@ -63,7 +76,7 @@ func testStartDebianStack(t *testing.T) {
 	base.SilentCommand(t, rootCmd, []string{"stack", "start"})
 
 	expectedContainers := []string{
-		config.ProjectConfig.ProjectName + "-" + config.ProjectConfig.DB.ContainerName,
+		config.ProjectConfig.ProjectName + "-" + config.ProjectConfig.Main.ContainerName,
 	}
 
 	for _, container := range expectedContainers {
@@ -189,20 +202,9 @@ func testRunCommandNotFound(t *testing.T) {
 	assert.Contains(t, lastLine, "sh: 1: olive: not found")
 }
 
-// func test CommandNotFound(t *testing.T) {
-// 	base.ChangeDirToDefault(t)
-// 	rootCmd := cmd.RootCmd
+func testDestroyPlainContainer(t *testing.T) {
+	base.ChangeDirToDefault(t)
 
-// 	buf := new(bytes.Buffer)
-// 	rootCmd.SetOut(buf)
-// 	rootCmd.SetErr(buf)
-
-// 	rootCmd.SetArgs([]string{"db", "shell"})
-// 	errExec := rootCmd.Execute()
-
-// 	assert.Error(t, errExec)
-// 	assert.Contains(t, errExec.Error(),
-// 		"The Container: "+config.ProjectConfig.ProjectName+`-`+config.ProjectConfig.DB.ContainerName+" doesn't exist",
-// 		"Did you forget to run mt stack start?",
-// 	)
-// }
+	rootCmd := cmd.RootCmd
+	base.SilentCommand(t, rootCmd, []string{"stack", "destroy"})
+}

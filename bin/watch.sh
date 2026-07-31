@@ -62,7 +62,13 @@ run_action() {
     echo "-------------------------------------------------------"
     color_purple "[ACTION] Starting Build at: $(date +'%H:%M:%S')"
     color_darkblue "[INFO]   Triggered by: $changed_file"
-    go build -ldflags "-X github.com/mattia37773/mt/config.Devmode=true"
+    
+    go build -ldflags="
+    -X github.com/mattia37773/mt/config.OverrideCurrentVersion=$(git describe --tags --always)
+    -X github.com/mattia37773/mt/config.BuildMethod=source
+    -X github.com/mattia37773/mt/config.Environment=dev
+    "
+    
     color_purple "[ACTION] Build Completed successfully."
     echo "-------------------------------------------------------"
     echo

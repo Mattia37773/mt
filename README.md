@@ -46,7 +46,7 @@ go build
 
 <details>
 <summary>GO</summary>
-Ensure you have Go 1.25.4 or later installed.
+Ensure you have Go 1.26.2 or later installed.
 
 First, add the Go binary directory to your system path if you haven't already:
 
@@ -57,7 +57,7 @@ echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc
 Then, install the package directly using:
 
 ```bash
-go install -ldflags "-X github.com/mattia37773/mt/config.BuildMethod=go" github.com/mattia37773/mt@latest
+go install -ldflags "-X github.com/mattia37773/mt/config.BuildMethod=github"
 ```
 
 </details>
@@ -69,7 +69,6 @@ Manage your Docker environment efficiently with the following commands:
 | Base Command | Command    | Description                                        |
 | :----------- | :--------- | :------------------------------------------------- |
 | **stack**    |            |                                                    |
-|              | build      | Build the docker images                            |
 |              | start      | Start the project stack                            |
 |              | stop       | Stop all services                                  |
 |              | restart    | Restart the project stack                          |
@@ -82,18 +81,11 @@ Manage your Docker environment efficiently with the following commands:
 |              | export-db  | Export current database state                      |
 | **php**      |            |                                                    |
 |              | console    | Run Symfony console commands                       |
-|              | phpunit    | Execute test suite                                 |
-|              | phpstan    | Run static analysis                                |
-|              | csfixer    | Run the PHP Coding Standards Fixer                 |
 |              | craft      | Run the Craft CMS CLI inside a container           |
 | **other**    |            |                                                    |
 |              | composer   | Run Composer inside the container                  |
-|              | bun        | Run Bun inside the container                       |
-|              | npm        | Run NPM inside the container                       |
-|              | yarn       | Run Yarn inside the container                      |
 |              | run        | Execute a command inside a container               |
 |              | shell      | Open a shell for a specific container              |
-|              | launch     | Open the primary URL in the browser                |
 |              | completion | Generate shell autocompletion scripts              |
 |              | config     | Generate a configuration file to override defaults |
 |              | update     | Updates the CLI                                    |
@@ -104,27 +96,26 @@ Manage your Docker environment efficiently with the following commands:
 
 ```yaml
 # .mt.yaml
-projectCompose:
-  paths:
+projectName: projectname
+paths:
+	# docker compose path
     dockerCompose: docker/docker-compose.yaml
+    # env file to load secrets.
+    # They can be referenced here like this: ${MYSQL_ROOT_PASSWORD}
     env: docker/.env
-  db:
+db:
     containerName: "db"
-    type: "mysql"
+    provider: "mysql"
     name: "appDb"
-    user: "uDb"
     password: "password"
-  backend:
+    user: "uDb"
+backend:
     containerName: fpm
-  frontend:
+frontend:
     containerName: fpm
-```
-
-It also needs these 2 environment variables:
-
-```env
-PROJECT_NAME=example # Expected default name & container prefix
-PRIMARY_SITE_URL=http://localhost:8080
+# container for the run command
+main:
+    containerName: fpm
 ```
 
 ## Contributing
