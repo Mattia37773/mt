@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testStack(t *testing.T) {
+func TestStack(t *testing.T) {
 
 	t.Run("Start", func(t *testing.T) {
 		testStartCmd(t)

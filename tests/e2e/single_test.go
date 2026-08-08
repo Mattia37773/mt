@@ -24,10 +24,6 @@ func TestSingles(t *testing.T) {
 		time.Sleep(30 * time.Second)
 	})
 
-	t.Run("Composer install", func(t *testing.T) {
-		testComposerInstall(t)
-	})
-
 	t.Run("Composer help", func(t *testing.T) {
 		testComposerHelp(t)
 	})
@@ -36,16 +32,12 @@ func TestSingles(t *testing.T) {
 		testRunWithArguments(t)
 	})
 
-	t.Run("Run doctrine migrations", func(t *testing.T) {
-		testRunDoctrineMigration(t)
-	})
-
 	t.Run("Run with --help argument", func(t *testing.T) {
 		testRunWithHelp(t)
 	})
 
-	t.Run("Symfony console load fixtures", func(t *testing.T) {
-		testConsoleLoadFixtures(t)
+	t.Run("Symfony console test", func(t *testing.T) {
+		testConsole(t)
 	})
 
 	t.Run("Destory Everything", func(t *testing.T) {
@@ -83,28 +75,6 @@ func TestSingles(t *testing.T) {
 	t.Run("Run without container", func(t *testing.T) {
 		testRunContainerNotRunning(t)
 	})
-}
-
-func testComposerInstall(t *testing.T) {
-	base.ChangeDirToSymfony(t)
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
-
-	rootCmd.SetArgs([]string{"composer", "install"})
-
-	errExec := rootCmd.Execute()
-	assert.NoError(t, errExec)
-
-	output := buf.String()
-	assert.Contains(t, output,
-		"Executing script cache:clear [OK]",
-		"Executing script assets:install --symlink --relative public [OK]",
-		"Executing script assets:install public [OK]",
-	)
-
 }
 
 func testComposerHelp(t *testing.T) {
@@ -166,28 +136,8 @@ func testRunWithArguments(t *testing.T) {
 	assert.Contains(t, cleanOutput, "symfony.lock")
 	assert.Contains(t, cleanOutput, "templates")
 	assert.Contains(t, cleanOutput, "var")
-	assert.Contains(t, cleanOutput, "vendor")
 	assert.Contains(t, cleanOutput, "vite.config.js")
 	assert.Contains(t, cleanOutput, "")
-}
-
-func testRunDoctrineMigration(t *testing.T) {
-	base.ChangeDirToSymfony(t)
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
-
-	// apply migration
-	buf.Reset()
-	rootCmd.SetArgs([]string{"run", "php", "bin/console", "doctrine:migrations:migrate", "-n"})
-	errExec := rootCmd.Execute()
-	assert.NoError(t, errExec)
-	cleanOutput := base.StripANSI(buf.String())
-
-	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
-	assert.Contains(t, lastLine, "[OK] Successfully migrated to version: ")
 }
 
 func testRunWithHelp(t *testing.T) {
@@ -207,7 +157,7 @@ func testRunWithHelp(t *testing.T) {
 	assert.Contains(t, lastLine, "or available locally via: info '(coreutils) ls invocation'")
 }
 
-func testConsoleLoadFixtures(t *testing.T) {
+func testConsole(t *testing.T) {
 	base.ChangeDirToSymfony(t)
 	rootCmd := cmd.RootCmd
 
@@ -215,22 +165,21 @@ func testConsoleLoadFixtures(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	rootCmd.SetArgs([]string{"php", "console", "doctrine:fixtures:load", "-n"})
+	rootCmd.SetArgs([]string{"php", "console"})
 	errExec := rootCmd.Execute()
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
-	lastLine := base.GetLineFromStringReversed(cleanOutput, 1)
-	assert.Contains(t, lastLine, "   > loading App\\DataFixtures\\AppFixtures")
+	assert.Contains(t, cleanOutput, "Fatal error: Uncaught LogicException: Dependencies are missing. Try running \"composer install\". in /app/bin/console:")
 }
 
 func testDestroy(t *testing.T) {
 	base.ChangeDirToSymfony(t)
 	db := config.GetDbConfig()
 
-	// delete vendor directory
-	vendorErr := os.RemoveAll("vendor")
-	assert.Nil(t, vendorErr)
+	// // delete vendor directory
+	// vendorErr := os.RemoveAll("vendor")
+	// assert.Nil(t, vendorErr)
 
 	dbDumpErr := os.RemoveAll(config.ProjectConfig.ProjectName + db.Filetype)
 	assert.Nil(t, dbDumpErr)

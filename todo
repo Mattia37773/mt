@@ -7,9 +7,9 @@ TODO
 - readme
 
 - before release
-  - tests
-  - goreleaser build
-  - vhs gif gen
+- tests
+- goreleaser build
+- vhs gif gen
 
 - opening merge request
 - linting
