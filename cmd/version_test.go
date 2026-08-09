@@ -7,7 +7,7 @@ import (
 	"bytes"
 	"testing"
 
-	base "github.com/mattia37773/mt/helper/basetest"
+	base "github.com/mattia37773/mt/tests/basetest"
 
 	"github.com/stretchr/testify/assert"
 )

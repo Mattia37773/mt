@@ -14,7 +14,7 @@ import (
 	_ "github.com/mattia37773/mt/cmd/php"
 	_ "github.com/mattia37773/mt/cmd/stack"
 	"github.com/mattia37773/mt/config"
-	base "github.com/mattia37773/mt/helper/basetest"
+	base "github.com/mattia37773/mt/tests/basetest"
 	"github.com/stretchr/testify/assert"
 )
 
