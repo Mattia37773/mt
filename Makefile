@@ -71,6 +71,7 @@ e2e: check-docker-compose  ## run the E2E test
 	" ./...  | grep -v '\[no test files\]'
 
 clear-docker: ## This remvoes everything in docker! from all namespaces
+	docker rm -f $$(docker ps -aq) 2>/dev/null || true
 	docker system prune -a --volumes -f
 
 check-docker-compose:
