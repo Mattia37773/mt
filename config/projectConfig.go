@@ -13,8 +13,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var exitFunc = os.Exit
-
 type ConfigStruct struct {
 	ProjectName string `yaml:"projectName"`
 
