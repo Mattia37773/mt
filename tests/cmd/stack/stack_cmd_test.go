@@ -1,7 +1,7 @@
 /*
 Copyright © 2026 Matze
 */
-package e2e
+package stack_test
 
 import (
 	"bytes"

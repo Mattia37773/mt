@@ -31,21 +31,21 @@ build: ## Build the binary
 test: check-docker-compose  ## Run the testsuite
 	@echo "Testing with unittests..."
 	go clean -cache
-	go test -v ./tests/... -ldflags="\
+	go test -v ./tests/cmd/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
 
 test-basic: ## Run the testsuite wihout the verbose flag
 	@echo "Testing with unittests without verbose mode..."
 	go clean -cache
-	go test -v ./tests/... -ldflags="\
+	go test -v ./tests/cmd/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
 
 test-cover: ## Show the test coverage
 	@echo "Shows unittest coverage..."
 	go clean -cache
-	go test -v ./tests/... -ldflags="\
+	go test -v ./tests/cmd/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
 

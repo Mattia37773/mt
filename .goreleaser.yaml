@@ -17,9 +17,8 @@ builds:
       - amd64
     ldflags:
       - -s -w
-      - -X github.com/mattia37773/mt/config.BuildMethod=github
-      - -X github.com/mattia37773/mt/config.OverrideCurrentVersion={{ .Tag }}
-      #- -X github.com/mattia37773/mt/config.OverrideCurrentVersion={{ .Tag }}
+    - "-X github.com/mattia37773/mt/config.BuildMethod=github"
+    - "-X github.com/mattia37773/mt/config.OverrideCurrentVersion={{ .Tag }}"
 
 archives:
   - formats: [tar.gz]

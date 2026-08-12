@@ -1,7 +1,7 @@
 /*
 Copyright © 2026 Matze
 */
-package e2e
+package single_test
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 	_ "github.com/mattia37773/mt/cmd/php"
 	_ "github.com/mattia37773/mt/cmd/stack"
 	"github.com/mattia37773/mt/config"
+	"github.com/mattia37773/mt/helper/docker"
 	base "github.com/mattia37773/mt/tests/basetest"
 	"github.com/stretchr/testify/assert"
 )
@@ -75,6 +76,29 @@ func TestSingles(t *testing.T) {
 	t.Run("Run without container", func(t *testing.T) {
 		testRunContainerNotRunning(t)
 	})
+}
+
+func testStartCmd(t *testing.T) {
+	base.ChangeDirToSymfony(t)
+
+	rootCmd := cmd.RootCmd
+	base.SilentCommand(t, rootCmd, []string{"stack", "start"})
+
+	expectedContainers := []string{
+		config.ProjectConfig.ProjectName + "-db",
+		config.ProjectConfig.ProjectName + "-fpm",
+		config.ProjectConfig.ProjectName + "-mailpit",
+		config.ProjectConfig.ProjectName + "-nginx",
+		config.ProjectConfig.ProjectName + "-phpmyadmin",
+	}
+
+	for _, container := range expectedContainers {
+		container := container
+		t.Run("Check_Container_"+container, func(t *testing.T) {
+			running := docker.IsContainerRunning(container)
+			assert.True(t, running, "The Container '%s'should run but doesn't", container)
+		})
+	}
 }
 
 func testComposerHelp(t *testing.T) {
