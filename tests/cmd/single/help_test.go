@@ -25,7 +25,7 @@ func TestHelpStyle(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -60,7 +60,7 @@ func TestCommandNotFound(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"xyz"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.Error(t, err)
 
 	assert.ErrorContains(t, err, `unknown command "xyz" for "mt"`)
@@ -74,7 +74,7 @@ func TestConfigHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"config", "--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())

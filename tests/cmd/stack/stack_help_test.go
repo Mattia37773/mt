@@ -22,7 +22,7 @@ func TestStackHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -48,7 +48,7 @@ func TestDestroyHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "destroy", "--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -67,7 +67,7 @@ func TestLogsHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "logs", "--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -87,7 +87,7 @@ func TestPsHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "ps", "--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -106,7 +106,7 @@ func TestRestartHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "restart", "--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -125,7 +125,7 @@ func TestStartHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "start", "--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -144,7 +144,7 @@ func TestStopHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "stop", "--help"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())

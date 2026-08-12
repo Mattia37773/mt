@@ -22,7 +22,7 @@ func TestPhpHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"php"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())

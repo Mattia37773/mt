@@ -23,7 +23,7 @@ func TestVersion(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetArgs([]string{"--version"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())

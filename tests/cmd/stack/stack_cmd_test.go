@@ -86,7 +86,7 @@ func testPsCmd(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "ps"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -118,7 +118,7 @@ func testLogsCmd(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"stack", "logs"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -145,7 +145,7 @@ func testLogsCmdSpecificContainer(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"stack", "logs", "fpm"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
@@ -186,7 +186,7 @@ func testRestartCmd(t *testing.T) {
 	rootCmd.SetErr(buf)
 	rootCmd.SetArgs([]string{"stack", "restart"})
 
-	err := rootCmd.Execute()
+	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	for _, container := range expectedContainers {

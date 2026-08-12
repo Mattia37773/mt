@@ -24,7 +24,7 @@ func TestNotExistingEnvFile(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"stack", "start"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.Error(t, errExec)
 
 	assert.Error(t, errExec)
@@ -42,7 +42,7 @@ func TestNotExistingEnvVar(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"stack", "start"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.Error(t, errExec)
 
 	assert.Error(t, errExec)
@@ -60,7 +60,7 @@ func TestNotExistingComposeFile(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"stack", "start"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.Error(t, errExec)
 
 	assert.Error(t, errExec)
@@ -79,7 +79,7 @@ func TestNotExistingComposeFile(t *testing.T) {
 // 	rootCmd.SetErr(buf)
 
 // 	rootCmd.SetArgs([]string{"stack", "start"})
-// 	errExec := rootCmd.Execute()
+// 	errExec := base.ExecuteCommand(rootCmd)
 // 	assert.NoError(t, errExec)
 
 // 	assert.Error(t, errExec)
@@ -97,7 +97,7 @@ func TestNotExistingComposeFile(t *testing.T) {
 // 	rootCmd.SetErr(buf)
 
 // 	rootCmd.SetArgs([]string{"stack", "start"})
-// 	errExec := rootCmd.Execute()
+// 	errExec := base.ExecuteCommand(rootCmd)
 // 	assert.NoError(t, errExec)
 
 // 	assert.Error(t, errExec)
@@ -115,7 +115,7 @@ func TestNotExistingConfigWithError(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"stack", "start"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.Error(t, errExec)
 
 	assert.Error(t, errExec)

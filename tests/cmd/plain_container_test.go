@@ -100,7 +100,7 @@ func testMysqlShellCommandNotFound(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "shell"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -117,7 +117,7 @@ func testMysqlExportCommandNotFound(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "export"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	t.Log(errExec)
 
 	assert.Error(t, errExec)
@@ -139,7 +139,7 @@ func testConsoleCommandNotFound(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"php", "console"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -156,7 +156,7 @@ func testCraftCommandNotFound(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"php", "craft"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -177,7 +177,7 @@ func testComposerCommandNotFound(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"composer"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -194,7 +194,7 @@ func testRunCommandNotFound(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"run", "olive"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 

@@ -10,6 +10,8 @@ import (
 	"os/exec"
 )
 
+// TODO try to get rid of all except one and try to handle the outut via byte buffers
+
 func ExecuteCommand(cmd *exec.Cmd) error {
 	if cmd.Stdout == nil {
 		cmd.Stdout = os.Stdout

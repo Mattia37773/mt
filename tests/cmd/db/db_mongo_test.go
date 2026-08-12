@@ -101,7 +101,7 @@ func testExportMongoDb(t *testing.T) {
 
 	// export db
 	rootCmd.SetArgs([]string{"db", "export"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
@@ -122,7 +122,7 @@ func testMongoImport(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", config.ProjectConfig.ProjectName + db.Filetype})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
@@ -197,7 +197,7 @@ func testMongoImportNoFileGiven(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", "file.gzip"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -214,7 +214,7 @@ func testMongoImportFileDoesntExist(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", "test.gzip"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -231,7 +231,7 @@ func testMongoImportContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", ".env"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -249,7 +249,7 @@ func testMongoExportContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "export"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -267,7 +267,7 @@ func testMongoShellContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "shell"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),

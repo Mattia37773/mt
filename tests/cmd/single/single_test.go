@@ -111,7 +111,7 @@ func testComposerHelp(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"composer", "--help"})
 
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
@@ -129,7 +129,7 @@ func testRunWithArguments(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"run", "ls", "-a1"})
 
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 	assert.Contains(t, cleanOutput, ".")
@@ -173,7 +173,7 @@ func testRunWithHelp(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"run", "ls", "--help"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
@@ -190,7 +190,7 @@ func testConsole(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"php", "console"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
@@ -225,7 +225,7 @@ func testShellWithoutContainerArgument(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"shell"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -242,7 +242,7 @@ func testShellWithoutFlagArgument(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"shell", "fpm", "-u"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -263,7 +263,7 @@ func testConsoleContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"php", "console", "symfony > laravel"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
 		"The Container: "+config.ProjectConfig.ProjectName+
@@ -283,7 +283,7 @@ func testCraftContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"php", "craft", "5 is worse then 4"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -301,7 +301,7 @@ func testComposerContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"composer", "blabla"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -319,7 +319,7 @@ func testRunContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"run", "i hate testing"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),

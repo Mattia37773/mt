@@ -97,7 +97,7 @@ func testExportMysqlDb(t *testing.T) {
 
 	// export db
 	rootCmd.SetArgs([]string{"db", "export"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
@@ -118,7 +118,7 @@ func testImportMysql(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", "backup" + db.Filetype})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, errExec)
 	cleanOutput := base.StripANSI(buf.String())
 
@@ -174,7 +174,7 @@ func testMysqlImportNoFileGiven(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", "file.sql"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -191,7 +191,7 @@ func testMysqlImportFileDoesntExist(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", "test.sql"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -208,7 +208,7 @@ func testMysqlImportContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "import", "-f", "backup.sql"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -226,7 +226,7 @@ func testMysqlExportContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "export"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
@@ -244,7 +244,7 @@ func testMysqlShellContainerNotRunning(t *testing.T) {
 	rootCmd.SetErr(buf)
 
 	rootCmd.SetArgs([]string{"db", "shell"})
-	errExec := rootCmd.Execute()
+	errExec := base.ExecuteCommand(rootCmd)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
