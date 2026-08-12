@@ -14,8 +14,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with: 
-          ref: main
+        with:
+          # TODO change main branch name
+          ref: develop
           fetch-depth: 0
 
       - name: Install VHS & Dependencies
@@ -33,20 +34,20 @@ jobs:
           # downloads the latest binary
           gh release download --pattern "*linux*amd64*" --dir ./bin || \
           gh release download --pattern "*Linux*x86_64*" --dir ./bin
-          
+
           cd bin
           find . -name "*.tar.gz" -exec tar -xzf {} \;
           find . -name "*.zip" -exec unzip -o {} \;
-          
+
           find . -type f -executable -exec mv {} . \;
           chmod +x *
           echo "$(pwd)" >> $GITHUB_PATH
 
       - name: Generate VHS GIF
-        run: vhs assets/mt.tape
-        
+        run: vhs docs/mt.tape
+
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update generated VHS GIF [skip ci]"
-          file_pattern: 'assets/*.gif'
+          file_pattern: "docs/*.gif"
