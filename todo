@@ -34,4 +34,4 @@ archives:
       - completions/*
 
 
-      curl -sL https://raw.githubusercontent.com/mattia37773/mt/main/install.sh | sh
+      

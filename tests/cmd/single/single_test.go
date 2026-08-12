@@ -83,7 +83,6 @@ func testStartCmd(t *testing.T) {
 
 	rootCmd := cmd.RootCmd
 	base.SilentCommand(t, rootCmd, []string{"stack", "start"})
-	time.Sleep(10 * time.Second)
 
 	expectedContainers := []string{
 		config.ProjectConfig.ProjectName + "-db",
@@ -92,6 +91,8 @@ func testStartCmd(t *testing.T) {
 		config.ProjectConfig.ProjectName + "-nginx",
 		config.ProjectConfig.ProjectName + "-phpmyadmin",
 	}
+
+	base.WaitForContainersRunning(t, expectedContainers, 3*time.Minute)
 
 	for _, container := range expectedContainers {
 		container := container

@@ -6,6 +6,7 @@ package cmd_test
 import (
 	"bytes"
 	"testing"
+	"time"
 
 	"github.com/mattia37773/mt/cmd"
 	_ "github.com/mattia37773/mt/cmd/db"
@@ -79,6 +80,8 @@ func testStartDebianStack(t *testing.T) {
 		config.ProjectConfig.ProjectName + "-" + config.ProjectConfig.Main.ContainerName,
 	}
 
+	base.WaitForContainersRunning(t, expectedContainers, 3*time.Minute)
+
 	for _, container := range expectedContainers {
 		t.Run("Check_Container_"+container, func(t *testing.T) {
 			running := docker.IsContainerRunning(container)
@@ -118,7 +121,6 @@ func testMysqlExportCommandNotFound(t *testing.T) {
 
 	rootCmd.SetArgs([]string{"db", "export"})
 	errExec := base.ExecuteCommand(rootCmd)
-	t.Log(errExec)
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
