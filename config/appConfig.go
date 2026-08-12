@@ -45,6 +45,7 @@ var AppConfig = struct {
 func init() {
 	getCurrentVersion()
 }
+
 func getCurrentVersion() string {
 
 	if OverrideCurrentVersion != "" {
