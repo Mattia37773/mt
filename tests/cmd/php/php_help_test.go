@@ -1,15 +1,16 @@
 /*
 Copyright © 2026 Matze
 */
-package php
+package php_test
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/mattia37773/mt/cmd"
-
+	_ "github.com/mattia37773/mt/cmd/php"
 	base "github.com/mattia37773/mt/tests/basetest"
+
 	"github.com/stretchr/testify/assert"
 )
 

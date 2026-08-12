@@ -1,7 +1,7 @@
 /*
 Copyright © 2026 Matze
 */
-package stack
+package stack_test
 
 import (
 	"bytes"
@@ -9,6 +9,7 @@ import (
 
 	"github.com/mattia37773/mt/cmd"
 	_ "github.com/mattia37773/mt/cmd/single"
+	_ "github.com/mattia37773/mt/cmd/stack"
 	base "github.com/mattia37773/mt/tests/basetest"
 	"github.com/stretchr/testify/assert"
 )

@@ -1,4 +1,3 @@
-APP_ENV         ?= dev
 MODULE_PATH 	:= github.com/mattia37773
 APP_NAME        := mt
 BUILD_METHOD 	:= source
@@ -27,46 +26,26 @@ build: ## Build the binary
 	@echo "Building..."
 	GIT_TAG=$(GIT_TAG) go build -ldflags="\
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=$(GIT_TAG)' \
-		-X '$(MODULE_PATH)/$(APP_NAME)/config.BuildMethod=$(BUILD_METHOD)' \
-		-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=$(APP_ENV)'"
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.BuildMethod=$(BUILD_METHOD)'
 
-test: ## Run the testsuite
+test: check-docker-compose  ## Run the testsuite
 	@echo "Testing with unittests..."
 	go clean -cache
-	go test -v ./cmd/... -ldflags="\
-	-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'\
+	go test -v ./tests/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
-
-test-all: ## Run the entire test suite
-	@echo "Run the entire testsuite"
-	@echo ""
-	$(MAKE) test
-	@echo ""
-	@echo ""
-	$(MAKE) e2e
 
 test-basic: ## Run the testsuite wihout the verbose flag
 	@echo "Testing with unittests without verbose mode..."
 	go clean -cache
-	go test ./cmd/... -ldflags="\
-	-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'\
+	go test -v ./tests/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
-	" ./... | grep -v '\[no test files\]'
+	" ./...  | grep -v '\[no test files\]'
 
 test-cover: ## Show the test coverage
 	@echo "Shows unittest coverage..."
 	go clean -cache
-	go test  ./cmd/... -cover -ldflags="\
-	-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=test'\
-	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
-	" ./...
-
-e2e: check-docker-compose  ## run the E2E test
-	@echo "Run E2E tests..."
-	go clean -cache
-	go test -v ./tests/e2e/... -ldflags="\
-	-X '$(MODULE_PATH)/$(APP_NAME)/config.Environment=dev'\
+	go test -v ./tests/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
 

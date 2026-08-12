@@ -1,13 +1,14 @@
 /*
 Copyright © 2026 Matze
 */
-package single
+package single_test
 
 import (
 	"bytes"
 	"testing"
 
 	"github.com/mattia37773/mt/cmd"
+	_ "github.com/mattia37773/mt/cmd/single"
 	_ "github.com/mattia37773/mt/cmd/stack"
 	"github.com/mattia37773/mt/config"
 	base "github.com/mattia37773/mt/tests/basetest"

@@ -38,5 +38,3 @@ jobs:
           echo "Build failed. Starting rollback for tag ${{ github.ref_name }}..."
           git push --delete origin ${{ github.ref_name }}
           git tag -d ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

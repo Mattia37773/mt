@@ -51,7 +51,7 @@ func BaseCommandGen(out io.Writer, baseCommand string, container string, checkCo
 	var projectName string = config.ProjectConfig.ProjectName
 
 	// Normal unittest run without docker
-	if config.Environment != "test" && checkCommandExist != false {
+	if checkCommandExist != false {
 		CheckContainerExits(out, projectName+"-"+container)
 		commandExists := docker.CommandExistsInContainer(projectName+"-"+container, baseCommand)
 		if commandExists == false {

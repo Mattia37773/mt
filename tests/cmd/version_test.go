@@ -1,12 +1,13 @@
 /*
 Copyright © 2026 Matze
 */
-package cmd
+package cmd_test
 
 import (
 	"bytes"
 	"testing"
 
+	"github.com/mattia37773/mt/cmd"
 	base "github.com/mattia37773/mt/tests/basetest"
 
 	"github.com/stretchr/testify/assert"
@@ -15,7 +16,7 @@ import (
 func TestVersion(t *testing.T) {
 	base.ChangeDirToDefault(t)
 
-	rootCmd := RootCmd
+	rootCmd := cmd.RootCmd
 
 	buf := new(bytes.Buffer)
 

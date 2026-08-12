@@ -8,7 +8,6 @@ import (
 	"io"
 
 	"github.com/mattia37773/mt/cmd"
-	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
 
 	"github.com/mattia37773/mt/ui/text"
@@ -50,11 +49,9 @@ func shellGen(out io.Writer, user string, args []string) ([]string, error) {
 
 	var container string = args[0]
 
-	if config.Environment != "test" {
-		containerErr := basecmd.CheckContainerExits(out, projectName+"-"+container)
-		if containerErr != nil {
-			return nil, containerErr
-		}
+	containerErr := basecmd.CheckContainerExits(out, projectName+"-"+container)
+	if containerErr != nil {
+		return nil, containerErr
 	}
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)

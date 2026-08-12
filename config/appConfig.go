@@ -17,7 +17,6 @@ var (
 	OverrideCurrentVersion = ""
 	BuildMethod            = "source"
 	LatestVersion          = getNewestCliVersionFunction(Version)
-	Environment            = "dev"
 )
 
 // static config

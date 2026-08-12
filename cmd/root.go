@@ -96,7 +96,7 @@ func showUpdateMessage(version string) {
 				"Current Version: " + config.Version,
 				"Latest  Version: " + latestVersion,
 			}
-			ui.Border(lines)
+			ui.Border(RootCmd.OutOrStderr(), lines)
 		}
 	}
 }

@@ -55,9 +55,7 @@ func logsStack(out io.Writer, follow bool, service string) ([]string, error) {
 		return []string{}, err
 	}
 
-	if config.Environment != "test" {
-		basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.Main.ContainerName)
-	}
+	basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.Main.ContainerName)
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")

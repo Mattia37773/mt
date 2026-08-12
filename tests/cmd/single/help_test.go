@@ -1,7 +1,7 @@
 /*
 Copyright © 2026 Matze
 */
-package single
+package single_test
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/mattia37773/mt/cmd/db"
 	_ "github.com/mattia37773/mt/cmd/php"
+	_ "github.com/mattia37773/mt/cmd/single"
 	_ "github.com/mattia37773/mt/cmd/stack"
 	"github.com/stretchr/testify/assert"
 )
