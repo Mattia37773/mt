@@ -7,7 +7,7 @@ before:
 builds:
   - main: .
     binary: mt
-    #mod_timestamp: '{{ .CommitTimestamp }}'
+    # mod_timestamp: '{{ .CommitTimestamp }}'
     env:
       - CGO_ENABLED=0
     goos:
@@ -19,8 +19,8 @@ builds:
       - amd64
     ldflags:
       - -s -w
-    - "-X github.com/mattia37773/mt/config.BuildMethod=github"
-    - "-X github.com/mattia37773/mt/config.OverrideCurrentVersion={{ .Tag }}"
+      - "-X github.com/mattia37773/mt/config.BuildMethod=github"
+      - "-X github.com/mattia37773/mt/config.OverrideCurrentVersion={{ .Tag }}"
 
 archives:
   - formats: [tar.gz]
@@ -55,10 +55,10 @@ checksum:
   name_template: "checksums.txt"
 
 godownloader:
-    name_template: "install.sh"
-    
-    checksum:
-      name_template: "checksums.txt"
+  name_template: "install.sh"
+
+  checksum:
+    name_template: "checksums.txt"
 
 release:
   name_template: "{{ .Tag }}"
