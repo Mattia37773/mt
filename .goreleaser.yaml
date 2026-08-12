@@ -54,12 +54,6 @@ changelog:
 checksum:
   name_template: "checksums.txt"
 
-godownloader:
-  name_template: "install.sh"
-
-  checksum:
-    name_template: "checksums.txt"
-
 release:
   name_template: "{{ .Tag }}"
   header: |
