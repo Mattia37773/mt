@@ -26,11 +26,13 @@ build: ## Build the binary
 	@echo "Building..."
 	GIT_TAG=$(GIT_TAG) go build -ldflags="\
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=$(GIT_TAG)' \
-		-X '$(MODULE_PATH)/$(APP_NAME)/config.BuildMethod=$(BUILD_METHOD)'
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.BuildMethod=$(BUILD_METHOD)'"
 
 test: check-docker-compose  ## Run the testsuite
 	@echo "Testing with unittests..."
 	go clean -cache
+## todo  check if the tests/bin directory has write & read permissons 
+## todo compile binary with specific version
 	go test -v -p 1 ./tests/cmd/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
@@ -52,6 +54,16 @@ test-cover: ## Show the test coverage
 clear-docker: ## This remvoes everything in docker! from all namespaces
 	docker rm -f $$(docker ps -aq) 2>/dev/null || true
 	docker system prune -a --volumes -f
+
+docker-show: ## Show all containers, images & volumes
+	@echo "All running docker containers"	
+	docker ps
+	@echo ""
+	@echo "All docker images"
+	docker image ls
+	@echo ""
+	@echo "All docker volumes"
+	docker volume ls
 
 check-docker-compose:
 	@if ! docker compose version >/dev/null 2>&1; then \

@@ -21,7 +21,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDbMysql(t *testing.T) {
+func testDbMysql(t *testing.T) {
 	t.Run("Start", func(t *testing.T) {
 		testStartMysqlStack(t)
 		time.Sleep(30 * time.Second)

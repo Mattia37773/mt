@@ -6,6 +6,8 @@ before:
 
 builds:
   - main: .
+    binary: mt
+    #mod_timestamp: '{{ .CommitTimestamp }}'
     env:
       - CGO_ENABLED=0
     goos:
@@ -40,9 +42,9 @@ changelog:
   sort: asc
   groups:
     - title: "Features"
-      regexp: "^feat"
+      regexp: '^feat(\(.*\))?:'
     - title: "Bug Fixes"
-      regexp: "^fix"
+      regexp: '^fix(\(.*\))?:'
   filters:
     exclude:
       - "^docs:"
@@ -52,11 +54,17 @@ changelog:
 checksum:
   name_template: "checksums.txt"
 
+godownloader:
+    name_template: "install.sh"
+    
+    checksum:
+      name_template: "checksums.txt"
+
 release:
   name_template: "{{ .Tag }}"
   header: |
 
-    -
+    new version  "{{ .Tag }}" released
 
   footer: |
     ---

@@ -1,18 +1,37 @@
 TODO
 
-- update & update tests
+- update test
+- remove more code and refactor
+- windows testing
 
+- after commit (- only allow to open merge request if they succed)
+- golangci check
+- unittests
 
-- readme
 
 - before release
-- tests
-- goreleaser build
-- vhs gif gen
+(strict last one must suceed to continue)
+- check version formatting and if its right with the go tag & & that things
+- e2e tests
+- goreleaser
+- vhs
 
-- opening merge request
-- linting
-- tests
--
 
-- windows testing
+ideen goreleaser
+
+Wenn deine CLI Frameworks wie Cobra, Urfave/CLI oder Kong nutzt, kannst du Autocompletion-Skripte für Bash, Zsh und Fish während des Builds generieren und in das Release-Archiv packen.
+before:
+  hooks:
+    - go mod tidy
+    # Beispiel: CLI hat einen Command 'mt completion zsh'
+    # - go run . completion zsh > completions/mt.zsh
+
+# Step 2: In die Archive integrieren
+archives:
+  - files:
+      - README.md
+      - LICENSE
+      - completions/*
+
+
+      curl -sL https://raw.githubusercontent.com/mattia37773/mt/main/install.sh | sh

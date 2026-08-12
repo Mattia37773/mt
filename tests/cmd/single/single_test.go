@@ -83,6 +83,7 @@ func testStartCmd(t *testing.T) {
 
 	rootCmd := cmd.RootCmd
 	base.SilentCommand(t, rootCmd, []string{"stack", "start"})
+	time.Sleep(10 * time.Second)
 
 	expectedContainers := []string{
 		config.ProjectConfig.ProjectName + "-db",
