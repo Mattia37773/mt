@@ -18,6 +18,7 @@ builds:
     ldflags:
       - -s -w
       - -X github.com/mattia37773/mt/config.BuildMethod=github
+      - -X github.com/mattia37773/mt/config.BuildMethod={{ .Tag }}
 
 archives:
   - formats: [tar.gz]
