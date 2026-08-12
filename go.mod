@@ -1,4 +1,4 @@
-module github.com/mattia37773/mt
+module github.com/mattia37773/mt/v7
 
 go 1.26.2
 
