@@ -10,6 +10,9 @@ permissions:
   contents: write
 
 jobs:
+  # TODO test on mac
+  # TODO test on linux
+  # todo test on windows
   goreleaser:
     runs-on: ubuntu-latest
     steps:
