@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/mattia37773/mt/cmd"
+	"github.com/mattia37773/mt/config"
 	_ "github.com/mattia37773/mt/config"
 	base "github.com/mattia37773/mt/tests/basetest"
 	"github.com/stretchr/testify/assert"
@@ -66,7 +67,7 @@ func TestUpdateGo(t *testing.T) {
 		"Installed via go",
 		"Please update with the follwing commands",
 		"clear the package cache: go clean -modcache",
-		"install the update: go install github.com/mattia37773/mt@latest",
+		"install the update: go install "+config.AppConfig.ModulePath+"@latest",
 	)
 }
 
