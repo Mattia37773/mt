@@ -36,9 +36,15 @@ jobs:
       #  * --- DOCKER SETUP JE NACH OS ---
       - name: Setup Docker (macOS)
         if: runner.os == 'macOS'
-        uses: AkihiroSuda/setup-colima-action@v0.1.0
-        with:
-          colima-version: "v0.6.8"
+        run: |
+          brew install colima docker docker-compose
+
+          # Docker Compose als Plugin verlinken
+          mkdir -p ~/.docker/cli-plugins
+          ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+
+          # Colima mit QEMU-Treiber auf macOS starten
+          colima start --vm-type=qemu --cpu 2 --memory 4
 
       - name: Verify Docker Setup
         run: |
@@ -48,6 +54,8 @@ jobs:
       # *--- TESTSUITE ---
       - name: Running Testsuite
         run: |
+          set -o pipefail
+
           echo "Testing with unittests..."
           echo
 
