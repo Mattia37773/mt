@@ -140,7 +140,7 @@ test-cover: ## Show the test coverage
 
 	go clean -cache
 	go test -v -p 1 ./tests/cmd/... -ldflags="\
-	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=dev' \
+	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
 
 	# removing the binaries
