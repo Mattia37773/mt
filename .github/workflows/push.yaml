@@ -2,6 +2,7 @@ name: Tests
 
 on:
   push:
+  pull_request:
   #    branches: [ "main" ]
 
 jobs:
@@ -37,13 +38,14 @@ jobs:
       - name: Setup Docker (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install colima docker docker-compose
+          # 1. qemu zusätzlich mitinstallieren
+          brew install colima docker docker-compose qemu
 
-          # Docker Compose als Plugin verlinken
-          mkdir -p ~/.docker/cli-plugins
-          ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+          # 2. Docker Config mit cliPluginsExtraDirs erstellen
+          mkdir -p ~/.docker
+          echo '{"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]}' > ~/.docker/config.json
 
-          # Colima mit QEMU-Treiber auf macOS starten
+          # 3. Colima starten
           colima start --vm-type=qemu --cpu 2 --memory 4
 
       - name: Verify Docker Setup
@@ -54,8 +56,6 @@ jobs:
       # *--- TESTSUITE ---
       - name: Running Testsuite
         run: |
-          set -o pipefail
-
           echo "Testing with unittests..."
           echo
 
