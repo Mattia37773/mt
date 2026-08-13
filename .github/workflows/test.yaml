@@ -2,8 +2,10 @@ name: Tests
 
 on:
   push:
+  #branches: [ "main" ]
   pull_request:
-  #    branches: [ "main" ]
+  #branches: [ main ]
+  workflow_call: # !<-- ERMÖGLICHT DEN AUFRUF AUS ANDEREN WORKFLOWS
 
 jobs:
   test:

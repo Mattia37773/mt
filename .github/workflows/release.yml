@@ -10,10 +10,13 @@ permissions:
   contents: write
 
 jobs:
+  run-tests:
+    uses: ./.github/workflows/test.yml # !Pfad zu deiner Tests-Datei im Repo
   # TODO test on mac
   # TODO test on linux
   # todo test on windows
   goreleaser:
+    needs: run-tests # ! Startet erst, wenn 'run-tests' erfolgreich war!
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
