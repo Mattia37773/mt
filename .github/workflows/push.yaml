@@ -1,19 +1,31 @@
 name: Tests
 
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
   #    branches: [ "main" ]
 
 jobs:
-  # This workflow contains a single job called "build"
-  test-linux:
-    runs-on: ubuntu-latest #runs-on: [ ubuntu-latest, windows-latest, macos-latest ]
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest] #windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      MODULE_PATH: "github.com/mattia37773" # Hier Ihren Modulpfad eintragen
+      APP_NAME: "mt" # Hier App-Namen eintragen
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        # with:
-        #   fetch-depth: 0
+        with:
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -21,12 +33,69 @@ jobs:
           go-version-file: "go.mod"
           cache: true
 
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update && sudo apt-get install -y make
-
+      #  * --- DOCKER SETUP JE NACH OS ---
       - name: Verify Go Modules
         run: go mod verify
 
+      - name: Setup Docker (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install colima docker docker-compose
+          colima start --cpu 2 --memory 4
+
+      - name: Verify Docker Setup
+        run: |
+          docker --version
+          docker compose version
+
+      # --- TESTSUITE ---
       - name: Running Testsuite
-        run: make test
+        run: |
+          echo "Testing with unittests..."
+          echo
+
+          # Dateiendung für Windows berücksichtigen (.exe)
+          EXE=""
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            EXE=".exe"
+          fi
+
+          mkdir -p tests/bin
+
+          echo "Removing old binaries"
+          rm -f tests/bin/homebrew-install$EXE
+          rm -f tests/bin/go-install$EXE
+          rm -f tests/bin/source-install$EXE
+
+          echo "Building binaries for testing update"
+          echo
+
+          # source install
+          go build \
+            -ldflags="\
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=source'" \
+            -o tests/bin/source-install$EXE
+
+          # go install
+          go build \
+            -ldflags="\
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
+            -o tests/bin/go-install$EXE
+
+          # homebrew install
+          go build \
+            -ldflags="\
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=homebrew'" \
+            -o tests/bin/homebrew-install$EXE
+
+          go clean -cache
+          go test -v -p 1 ./tests/cmd/... -ldflags="\
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
+            ./... | grep -v '\[no test files\]' || true
+
+          echo "Removing the binaries"
+          rm -f tests/bin/homebrew-install$EXE
+          rm -f tests/bin/go-install$EXE
+          rm -f tests/bin/source-install$EXE

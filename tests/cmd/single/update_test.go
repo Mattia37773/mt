@@ -6,6 +6,7 @@ package single
 import (
 	"bytes"
 	"os/exec"
+	"runtime"
 	"testing"
 
 	"github.com/mattia37773/mt/cmd"
@@ -23,6 +24,11 @@ func TestUpdateFromSource(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
+	binary := "./source-install"
+	if runtime.GOOS == "windows" {
+		binary += ".exe"
+	}
+
 	// updateRejectCmd := exec.Command("../../bin/source-install", "update", "--confirm=false")
 	// updateRejectOut, _ := updateRejectCmd.Output()
 
@@ -30,21 +36,21 @@ func TestUpdateFromSource(t *testing.T) {
 	// 	"mt version v1.0.0",
 	// )
 
-	versionCmd := exec.Command("./source-install", "--version")
+	versionCmd := exec.Command(binary, "--version")
 	versionOut, _ := versionCmd.Output()
 
 	assert.Contains(t, base.StripANSI(string(versionOut)),
 		"mt version v1.0.0",
 	)
 
-	updateCmd := exec.Command("./source-install", "update", "--confirm")
+	updateCmd := exec.Command(binary, "update", "--confirm")
 	updateOut, _ := updateCmd.Output()
 
 	assert.Contains(t, base.StripANSI(string(updateOut)),
 		"Successfully Updated the Cli to version: ",
 	)
 
-	updateAfterCmd := exec.Command("./source-install", "update", "--confirm")
+	updateAfterCmd := exec.Command(binary, "update", "--confirm")
 	updateAfterOut, _ := updateAfterCmd.Output()
 
 	assert.Contains(t, base.StripANSI(string(updateAfterOut)),
@@ -60,7 +66,12 @@ func TestUpdateGo(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	updateCmd := exec.Command("./go-install", "update", "--confirm")
+	binary := "./go-install"
+	if runtime.GOOS == "windows" {
+		binary += ".exe"
+	}
+
+	updateCmd := exec.Command(binary, "update", "--confirm")
 	updateOut, _ := updateCmd.Output()
 
 	assert.Contains(t, base.StripANSI(string(updateOut)),
@@ -79,7 +90,12 @@ func TestUpdateHomebrew(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	updateCmd := exec.Command("./homebrew-install", "update", "--confirm")
+	binary := "./go-install"
+	if runtime.GOOS == "windows" {
+		binary += ".exe"
+	}
+
+	updateCmd := exec.Command(binary, "update", "--confirm")
 	updateOut, _ := updateCmd.Output()
 
 	assert.Contains(t, base.StripANSI(string(updateOut)),
