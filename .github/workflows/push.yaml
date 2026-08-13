@@ -97,7 +97,7 @@ jobs:
 
           go clean -cache
           go test -v -p 1 ./tests/cmd/... -ldflags="\
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=dev'" \
             ./... 
 
           echo "Removing the binaries"

@@ -90,7 +90,7 @@ func TestUpdateHomebrew(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	binary := "./go-install"
+	binary := "./homebrew-install"
 	if runtime.GOOS == "windows" {
 		binary += ".exe"
 	}
