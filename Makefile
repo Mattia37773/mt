@@ -26,30 +26,128 @@ build: ## Build the binary
 	@echo "Building..."
 	GIT_TAG=$(GIT_TAG) go build -ldflags="\
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=$(GIT_TAG)' \
-		-X '$(MODULE_PATH)/$(APP_NAME)/config.BuildMethod=$(BUILD_METHOD)'"
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=$(BUILD_METHOD)'"
 
 test: check-docker-compose  ## Run the testsuite
 	@echo "Testing with unittests..."
+	@echo
+
+	@echo "Removing the binaries"
+	@rm -f tests/bin/homebrew-install
+	@rm -f tests/bin/go-install
+	@rm -f tests/bin/source-install
+
+	@echo "Building binarie for testing update"
+	@echo
+# source install
+	GIT_TAG=$(GIT_TAG) go build \
+		-ldflags="\
+			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
+			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=source'" \
+		-o tests/bin/source-install
+# go install
+	GIT_TAG=$(GIT_TAG) go build \
+	-ldflags="\
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0'" \
+	-o tests/bin/go-install
+# homebrew install
+	GIT_TAG=$(GIT_TAG) go build \
+	-ldflags="\
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=homebrew'" \
+	-o tests/bin/homebrew-install
+
 	go clean -cache
-## todo  check if the tests/bin directory has write & read permissons 
-## todo compile binary with specific version
 	go test -v -p 1 ./tests/cmd/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
 
+# removing the binaries
+	@echo "Removing the binaries"
+	@rm -f tests/bin/homebrew-install
+	@rm -f tests/bin/go-install
+	@rm -f tests/bin/source-install
+
 test-basic: ## Run the testsuite wihout the verbose flag
 	@echo "Testing with unittests without verbose mode..."
+		@echo
+
+	@echo "Removing the binaries"
+	@rm -f tests/bin/homebrew-install
+	@rm -f tests/bin/go-install
+	@rm -f tests/bin/source-install
+
+	@echo "Building binarie for testing update"
+	@echo
+# source install
+	GIT_TAG=$(GIT_TAG) go build \
+		-ldflags="\
+			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
+			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=source'" \
+		-o tests/bin/source-install
+# go install
+	GIT_TAG=$(GIT_TAG) go build \
+	-ldflags="\
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0'" \
+	-o tests/bin/go-install
+# homebrew install
+	GIT_TAG=$(GIT_TAG) go build \
+	-ldflags="\
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=homebrew'" \
+	-o tests/bin/homebrew-install
+
 	go clean -cache
 	go test -p 1 ./tests/cmd/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
 
+	# removing the binaries
+	@echo "Removing the binaries"
+	@rm -f tests/bin/homebrew-install
+	@rm -f tests/bin/go-install
+	@rm -f tests/bin/source-install
+
 test-cover: ## Show the test coverage
 	@echo "Shows unittest coverage..."
+		@echo "Testing with unittests..."
+	@echo
+
+	@echo "Removing the binaries"
+	@rm -f tests/bin/homebrew-install
+	@rm -f tests/bin/go-install
+	@rm -f tests/bin/source-install
+
+	@echo "Building binarie for testing update"
+	@echo
+# source install
+	GIT_TAG=$(GIT_TAG) go build \
+		-ldflags="\
+			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
+			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=source'" \
+		-o tests/bin/source-install
+# go install
+	GIT_TAG=$(GIT_TAG) go build \
+	-ldflags="\
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0'" \
+	-o tests/bin/go-install
+# homebrew install
+	GIT_TAG=$(GIT_TAG) go build \
+	-ldflags="\
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
+		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=homebrew'" \
+	-o tests/bin/homebrew-install
+
 	go clean -cache
 	go test -v -p 1 ./tests/cmd/... -ldflags="\
 	-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 	" ./...  | grep -v '\[no test files\]'
+
+	# removing the binaries
+	@echo "Removing the binaries"
+	@rm -f tests/bin/homebrew-install
+	@rm -f tests/bin/go-install
+	@rm -f tests/bin/source-install
 
 clear-docker: ## This remvoes everything in docker! from all namespaces
 	docker rm -f $$(docker ps -aq) 2>/dev/null || true
@@ -76,3 +174,4 @@ check-docker-compose:
 		exit 1; \
 	fi
 	
+

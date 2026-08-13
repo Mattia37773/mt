@@ -67,7 +67,7 @@ func versionStyle(cmd *cobra.Command) {
 	cmd.SetVersionTemplate(
 		text.GlowPink("{{.Name}}") +
 			" " +
-			text.GlowPurple("version {{.Version}}") +
+			text.GlowPurple("version "+config.Version) +
 			"\n",
 	)
 }

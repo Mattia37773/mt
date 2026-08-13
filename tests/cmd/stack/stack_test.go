@@ -205,7 +205,6 @@ func testRestartCmd(t *testing.T) {
 
 func testStopCmd(t *testing.T) {
 	base.ChangeDirToSymfony(t)
-	t.Log(config.ProjectConfig.ProjectName)
 
 	rootCmd := cmd.RootCmd
 	base.SilentCommand(t, rootCmd, []string{"stack", "stop"})

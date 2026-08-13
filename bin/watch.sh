@@ -65,7 +65,7 @@ run_action() {
     
     go build -ldflags="
     -X github.com/mattia37773/mt/config.OverrideCurrentVersion=$(git describe --tags --always)
-    -X github.com/mattia37773/mt/config.BuildMethod=source
+    -X github.com/mattia37773/mt/config.OverrideBuildMethod=source
     "
     
     color_purple "[ACTION] Build Completed successfully."

@@ -25,10 +25,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var skipInteractiveUpdate bool
+
 var updateCmd = &cobra.Command{
 	Use:                   "update",
 	Short:                 "Updates the cli",
-	DisableFlagParsing:    true,
 	DisableFlagsInUseLine: true,
 	RunE: func(c *cobra.Command, args []string) error {
 		err := updateSingle(c.OutOrStdout())
@@ -41,6 +42,13 @@ var updateCmd = &cobra.Command{
 }
 
 func init() {
+	// todo flag setting to nointeractivly say no
+	updateCmd.Flags().BoolVar(
+		&skipInteractiveUpdate,
+		"confirm",
+		false,
+		"Skip interactive confirmation",
+	)
 	cmd.RootCmd.AddCommand(updateCmd)
 }
 
@@ -52,21 +60,20 @@ func updateSingle(out io.Writer) error {
 	}
 
 	switch buildmethod := config.BuildMethod; buildmethod {
-	case "github":
-		confirm, err := form.Confirm("Do you want to pull the latest updates from GitHub?")
-		if err != nil {
-			return fmt.Errorf("%s", err)
-		}
-		if confirm == true {
-			githubReleasesUpdate(out)
-		} else {
-			fmt.Fprintln(out, "Continuing without updating.")
-		}
 	case "source":
-		confirm, err := form.Confirm("You compiled this project yourself.\nDo you want to pull the latest updates from GitHub?")
+		var confirm bool
+		var err error = nil
+
+		if skipInteractiveUpdate == false {
+			confirm, err = form.Confirm("Do you want to pull the latest updates from GitHub?")
+		} else {
+			confirm = true
+		}
+
 		if err != nil {
 			return fmt.Errorf("%s", err)
 		}
+
 		if confirm == true {
 			err := githubReleasesUpdate(out)
 			if err != nil {
@@ -77,7 +84,8 @@ func updateSingle(out io.Writer) error {
 		}
 		return nil
 	case "go":
-		cmd := `go install -ldflags "-X ` + config.AppConfig.ModulePath + `/config.BuildMethod=go" ` + config.AppConfig.ModulePath + `@latest`
+		// TODO define how thats done
+		cmd := `go install` + config.AppConfig.ModulePath + `@latest`
 
 		fmt.Fprintln(out, text.Green("Installed via go"))
 		fmt.Fprintln(out, "Please update with the follwing commands")
@@ -85,7 +93,7 @@ func updateSingle(out io.Writer) error {
 		fmt.Fprintf(out, "install the update: \"%s\"\n", cmd)
 	case "homebrew":
 		fmt.Fprintln(out, text.Green("Installed via Homebrew."))
-		fmt.Fprintln(out, "Please update with \"brew upgrade mt\".")
+		fmt.Fprintln(out, "Please update with: brew upgrade mt")
 	default:
 		fmt.Fprintln(out, "There is currently not an option for this build method.")
 		fmt.Fprintln(out, "This is only possible by manually modifiy the source code")

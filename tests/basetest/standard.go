@@ -79,6 +79,13 @@ func ChangeDirToNoConfigFilWithError(t *testing.T) {
 	config.ParseConfigFile()
 }
 
+// binary path for updates
+func ChangeDirToBin(t *testing.T) {
+	dir := rootDir([]string{"tests", "bin"})
+	t.Chdir(dir)
+	config.ParseConfigFile()
+}
+
 // get the project root directory
 func rootDir(projectFilepaths []string) string {
 	dir, err := os.Getwd()

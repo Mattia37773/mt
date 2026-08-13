@@ -11,14 +11,6 @@ import (
 	"runtime/debug"
 )
 
-// config that can be overridden by ldflags
-var (
-	Version                = getCurrentVersion()
-	OverrideCurrentVersion = ""
-	BuildMethod            = "source"
-	LatestVersion          = getNewestCliVersionFunction(Version)
-)
-
 // static config
 var AppConfig = struct {
 	BuildMethod   string
@@ -40,6 +32,16 @@ var AppConfig = struct {
 ╚═╝     ╚═╝    ╚═╝
 `,
 }
+
+// config that can be overridden by ldflags
+var (
+	Version                = getCurrentVersion()
+	OverrideCurrentVersion = ""
+	// Build method for the update command
+	OverrideBuildMethod = ""
+	BuildMethod         = getBuildMethod()
+	LatestVersion       = getNewestCliVersionFunction(Version)
+)
 
 func init() {
 	getCurrentVersion()
@@ -93,4 +95,19 @@ func getNewestCliVersionFunction(currentVersion string) string {
 
 		return currentVersion
 	}
+}
+
+// if the build methid is set, it return that
+// if a buildmethod isn't set it sets it as go
+func getBuildMethod() string {
+	if OverrideBuildMethod != "" {
+		return OverrideBuildMethod
+	}
+
+	_, ok := debug.ReadBuildInfo()
+	if !ok {
+		return "source"
+	}
+
+	return "go"
 }
