@@ -35,13 +35,13 @@ jobs:
 
       #  * --- DOCKER SETUP JE NACH OS ---
       - name: Setup Docker (macOS)
-            if: runner.os == 'macOS'
-            uses: abiosoft/colima-action@v1.10.0
-            with:
-              colima-version: 'v0.6.8'
-              type: qemu
-              cpu: 2
-              memory: 4
+        if: runner.os == 'macOS'
+        uses: abiosoft/colima-action@v1.10.0
+        with:
+          colima-version: "v0.6.8"
+          type: qemu
+          cpu: 2
+          memory: 4
 
       - name: Verify Docker Setup
         run: |
