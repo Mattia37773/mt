@@ -98,7 +98,7 @@ jobs:
           go clean -cache
           go test -v -p 1 ./tests/cmd/... -ldflags="\
             -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
-            ./... | grep -v '\[no test files\]'
+            ./... 
 
           echo "Removing the binaries"
           rm -f tests/bin/homebrew-install$EXE
