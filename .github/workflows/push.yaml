@@ -34,21 +34,21 @@ jobs:
           cache: true
 
       #  * --- DOCKER SETUP JE NACH OS ---
-      - name: Verify Go Modules
-        run: go mod verify
-
       - name: Setup Docker (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install colima docker docker-compose
-          colima start --cpu 2 --memory 4
+            if: runner.os == 'macOS'
+            uses: abiosoft/colima-action@v1.10.0
+            with:
+              colima-version: 'v0.6.8'
+              type: qemu
+              cpu: 2
+              memory: 4
 
       - name: Verify Docker Setup
         run: |
           docker --version
           docker compose version
 
-      # --- TESTSUITE ---
+      # *--- TESTSUITE ---
       - name: Running Testsuite
         run: |
           echo "Testing with unittests..."
@@ -93,7 +93,7 @@ jobs:
           go clean -cache
           go test -v -p 1 ./tests/cmd/... -ldflags="\
             -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
-            ./... | grep -v '\[no test files\]' || true
+            ./... 
 
           echo "Removing the binaries"
           rm -f tests/bin/homebrew-install$EXE
