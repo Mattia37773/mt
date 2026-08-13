@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -22,9 +23,22 @@ var RootCmd = &cobra.Command{
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		// parse the config file
 		err := config.ParseConfigFile()
 		if err != nil {
 			return err
+		}
+
+		// When the command is update
+		// the message shouldn't show up
+		if len(os.Args) == 2 {
+			arg := os.Args[1:]
+			argName := strings.Join(arg, "")
+			if argName != "update" {
+				showUpdateMessage(cmd.OutOrStdout())
+			}
+		} else {
+			showUpdateMessage(cmd.OutOrStdout())
 		}
 		return nil
 	},
@@ -43,23 +57,8 @@ func Execute() {
 }
 
 func init() {
-	// load the project config
-
 	versionStyle(RootCmd)
 	RootCmd.Version = config.Version
-
-	// When the command is update
-	// the message shouldn't show up
-	if len(os.Args) == 2 {
-		arg := os.Args[1:]
-		argName := strings.Join(arg, "")
-		if argName != "update" {
-			showUpdateMessage(config.Version)
-		}
-	} else {
-		showUpdateMessage(config.Version)
-	}
-
 	//RootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
@@ -83,20 +82,21 @@ func errorMessage(err error) {
 
 	fmt.Println()
 	fmt.Println(text.GlowPink("Try mt --help for usage."))
-	// TODO remvoe exit?
 	os.Exit(1)
 }
 
-func showUpdateMessage(version string) {
+func showUpdateMessage(out io.Writer) {
 	latestVersion := config.LatestVersion
+	version := config.Version
+
 	if version < latestVersion {
 		if version != "dev" {
 			lines := []string{
 				"A new update is available",
-				"Current Version: " + config.Version,
+				"Current Version: " + version,
 				"Latest  Version: " + latestVersion,
 			}
-			ui.Border(RootCmd.OutOrStderr(), lines)
+			ui.Border(out, lines)
 		}
 	}
 }
