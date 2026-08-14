@@ -55,7 +55,7 @@ jobs:
             --cpu 2 \
             --memory 4 \
             --mount "${GITHUB_WORKSPACE}:w" \
-            --mount-type virtfs
+            --mount-type 9p
 
           sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
