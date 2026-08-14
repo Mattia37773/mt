@@ -49,12 +49,19 @@ jobs:
           echo '{"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]}' > ~/.docker/config.json
 
           # 3. Colima starten
+          colima start \
+            --arch aarch64 \
+            --vm-type qemu \
+            --cpu 2 \
+            --memory 4 \
+            --mount "${GITHUB_WORKSPACE}:w" \
+            --mount-type virtfs
 
-          colima start --vm-type=qemu --cpu 2 --memory 2 --mount "${GITHUB_WORKSPACE}:w" --mount-type 9p
           sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
       - name: Verify Docker Setup
         run: |
+          docker info
           docker --version
           docker compose version
 
