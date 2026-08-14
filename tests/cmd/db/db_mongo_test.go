@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testDbMongo(t *testing.T) {
+func TestDbMongo(t *testing.T) {
 	t.Run("Start", func(t *testing.T) {
 		testStartMongoStack(t)
 		time.Sleep(30 * time.Second)
