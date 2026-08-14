@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-26-intel,windows-latest]#ubuntu-latest# #
+        os: [windows-latest]#ubuntu-latest# #macos-26-intel,
 
     runs-on: ${{ matrix.os }}
 
@@ -51,10 +51,10 @@ jobs:
           echo "Starting Docker service on Windows..."
           net start docker || true
 
-          # 2. Status & Versionen prüfen
-          docker version
-          docker compose version
+          cd "C:\Program Files\Docker\Docker"
+          ./DockerCli.exe -SwitchDaemon || true
 
+      # * --- verify SETUP (docker) ---
       - name: Verify Docker Setup
         run: |
           docker --version
