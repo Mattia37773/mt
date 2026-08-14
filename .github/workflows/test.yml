@@ -41,22 +41,25 @@ jobs:
       - name: Setup Docker (macOS)
         if: runner.os == 'macOS'
         run: |
-          # 1. qemu zusätzlich mitinstallieren
-          brew install colima docker docker-compose qemu
 
-          # 2. Docker Config mit cliPluginsExtraDirs erstellen
+         brew install colima docker docker-compose
+          
           mkdir -p ~/.docker
           echo '{"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]}' > ~/.docker/config.json
 
-          # 3. Colima starten
+          # Erstelle einen lokalen Temp-Ordner im Workspace für Go-Tests
+          mkdir -p "${GITHUB_WORKSPACE}/.tmp"
+
+          # Colima starten und SOWOHL Workspace ALS AUCH /tmp mounten
           colima start \
             --arch aarch64 \
             --vm-type qemu \
             --cpu 2 \
             --memory 4 \
             --mount "${GITHUB_WORKSPACE}:w" \
+            --mount "/tmp:w" \
             --mount-type 9p
-
+            
           sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
       - name: Verify Docker Setup
