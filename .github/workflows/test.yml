@@ -5,14 +5,14 @@ on:
   #branches: [ "main" ]
   pull_request:
   #branches: [ main ]
-  workflow_call: # !<-- ERMÖGLICHT DEN AUFRUF AUS ANDEREN WORKFLOWS
+  workflow_call: 
 
 jobs:
   test:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest]#macos-latest #windows-latest
+        os: [macos-latest]#ubuntu-latest# #windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -21,8 +21,8 @@ jobs:
         shell: bash
 
     env:
-      MODULE_PATH: "github.com/mattia37773" # Hier Ihren Modulpfad eintragen
-      APP_NAME: "mt" # Hier App-Namen eintragen
+      MODULE_PATH: "github.com/mattia37773"
+      APP_NAME: "mt"
 
     steps:
       - name: Checkout
@@ -37,6 +37,7 @@ jobs:
           cache: true
 
       #  * --- DOCKER SETUP JE NACH OS ---
+      #colima start --vm-type=qemu --cpu 2 --memory 4
       - name: Setup Docker (macOS)
         if: runner.os == 'macOS'
         run: |
@@ -48,7 +49,9 @@ jobs:
           echo '{"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]}' > ~/.docker/config.json
 
           # 3. Colima starten
-          colima start --vm-type=qemu --cpu 2 --memory 4
+
+          colima start --vm-type=qemu --cpu 2 --memory 2GB --mount "${GITHUB_WORKSPACE}:w" --mount-type 9p
+          sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
       - name: Verify Docker Setup
         run: |
