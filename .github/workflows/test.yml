@@ -42,25 +42,17 @@ jobs:
         if: runner.os == 'macOS'
         run: |
 
-         brew install colima docker docker-compose
-          
-          mkdir -p ~/.docker
-          echo '{"cliPluginsExtraDirs": ["/opt/homebrew/lib/docker/cli-plugins"]}' > ~/.docker/config.json
+          brew install colima docker docker-compose
+          # brew install docker-buildx
 
-          # Erstelle einen lokalen Temp-Ordner im Workspace für Go-Tests
-          mkdir -p "${GITHUB_WORKSPACE}/.tmp"
+          mkdir -p ~/.docker/cli-plugins
+          ln -sfn $(brew --prefix)/opt/docker-compose/bin/docker-compose ~/.docker/cli-plugins/docker-compose
+          #ln -sfn $(brew --prefix)/opt/docker-buildx/bin/docker-buildx ~/.docker/cli-plugins/docker-buildx
 
-          # Colima starten und SOWOHL Workspace ALS AUCH /tmp mounten
           colima start \
             --arch aarch64 \
-            --vm-type qemu \
-            --cpu 2 \
-            --memory 4 \
-            --mount "${GITHUB_WORKSPACE}:w" \
-            --mount "/tmp:w" \
-            --mount-type 9p
-            
-          sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
+            --vm-type=qemu \
+            --nested-virtualization
 
       - name: Verify Docker Setup
         run: |
