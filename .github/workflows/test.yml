@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-26-intel]#ubuntu-latest# #windows-latest
+        os: [macos-26-intel,windows-latest]#ubuntu-latest# #
 
     runs-on: ${{ matrix.os }}
 
@@ -37,12 +37,23 @@ jobs:
           cache: true
 
       #  * --- DOCKER SETUP Mac OS ---
-      - name: Setup Docker Desktop macOS
+      - name: Setup Docker (Mac OS)
         uses: gh-workflow/setup-docker-desktop-macos@0.0.12
         if: runner.os == 'macOS'
         with:
           print_diagnostics: false
 
+      # * --- DOCKER SETUP (WINDOWS) ---
+      - name: Setup Docker (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          # 1. Docker-Dienst auf Windows starten
+          echo "Starting Docker service on Windows..."
+          net start docker || true
+
+          # 2. Status & Versionen prüfen
+          docker version
+          docker compose version
 
       - name: Verify Docker Setup
         run: |
