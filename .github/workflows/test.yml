@@ -59,7 +59,7 @@ jobs:
         run: |
           docker --version
           docker compose version
-          docker compose -f tests/projects/symfony/docker/docker-compose.yaml -d --build
+          docker compose up -f tests/projects/symfony/docker/docker-compose.yaml -d --build
 
       # * --- TESTSUITE ---
       - name: Running Testsuite
