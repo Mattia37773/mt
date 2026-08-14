@@ -51,9 +51,6 @@ jobs:
           echo "Starting Docker service on Windows..."
           net start docker || true
 
-          cd "C:\Program Files\Docker\Docker"
-          ./DockerCli.exe -SwitchDaemon || true
-
       # * --- verify SETUP (docker) ---
       - name: Verify Docker Setup
         run: |
