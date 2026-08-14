@@ -6,9 +6,12 @@ on:
       - completed
 
 jobs:
+  # todo depends on release
   vhs:
+    uses: ./.github/workflows/release.yml
+    needs: run-tests
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: write
     steps:
