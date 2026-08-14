@@ -1,14 +1,10 @@
 name: vhs
-# on:
-#   workflow_run:
-#     workflows: ["Release"]
-#     types:
-#       - completed
-
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_call: # <-- Macht die Datei wiederverwendbar
+  # workflow_run:
+  #   workflows: ["Release"]
+  #   types:
+  #     - completed
 
 jobs:
   # todo depends on release

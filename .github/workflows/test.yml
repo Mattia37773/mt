@@ -1,7 +1,7 @@
 name: Tests
 
 on:
-  push:
+  #push:
   #branches: [ "main" ]
   pull_request:
   #branches: [ main ]
@@ -106,3 +106,7 @@ jobs:
           rm -f tests/bin/homebrew-install$EXE
           rm -f tests/bin/go-install$EXE
           rm -f tests/bin/source-install$EXE
+
+  vhs:
+    needs: goreleaser
+    uses: ./.github/workflows/vhs.yml
