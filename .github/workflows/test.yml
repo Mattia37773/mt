@@ -36,8 +36,7 @@ jobs:
           go-version-file: "go.mod"
           cache: true
 
-      #  * --- DOCKER SETUP JE NACH OS ---
-      #colima start --vm-type=qemu --cpu 2 --memory 4
+      #  * --- DOCKER SETUP Mac OS ---
       - name: Setup Docker Desktop macOS
         uses: gh-workflow/setup-docker-desktop-macos@0.0.12
         if: runner.os == 'macOS'
@@ -47,11 +46,11 @@ jobs:
 
       - name: Verify Docker Setup
         run: |
-          docker info
           docker --version
           docker compose version
+          docker compose -f tests/projects/symfony/docker/docker-compose.yaml -d --build
 
-      # *--- TESTSUITE ---
+      # * --- TESTSUITE ---
       - name: Running Testsuite
         run: |
           echo "Testing with unittests..."
@@ -102,3 +101,4 @@ jobs:
           rm -f tests/bin/homebrew-install$EXE
           rm -f tests/bin/go-install$EXE
           rm -f tests/bin/source-install$EXE
+# todo glangci job
