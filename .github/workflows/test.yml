@@ -50,7 +50,7 @@ jobs:
 
           # 3. Colima starten
 
-          colima start --vm-type=qemu --cpu 2 --memory 2GB --mount "${GITHUB_WORKSPACE}:w" --mount-type 9p
+          colima start --vm-type=qemu --cpu 2 --memory 2 --mount "${GITHUB_WORKSPACE}:w" --mount-type 9p
           sudo ln -sf $HOME/.colima/default/docker.sock /var/run/docker.sock
 
       - name: Verify Docker Setup
