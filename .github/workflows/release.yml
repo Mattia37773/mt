@@ -44,3 +44,7 @@ jobs:
           echo "Build failed. Starting rollback for tag ${{ github.ref_name }}..."
           git push --delete origin ${{ github.ref_name }}
           git tag -d ${{ github.ref_name }}
+
+  vhs:
+    needs: goreleaser
+    uses: ./.github/workflows/vhs.yml
