@@ -76,45 +76,44 @@ jobs:
       - name: Run Testsuite (macos & linux)
         if: runner.os == 'macOS' || runner.os == 'Linux'
         run: |
+          GOOS="$(go env GOOS)"
 
-        GOOS="$(go env GOOS)"
+          echo "Testing with unittests..."
+          echo
 
-        echo "Testing with unittests..."
-        echo
+          echo "Removing the binaries"
+          rm -rf tests/bin/${GOOS}/
+          mkdir -p tests/bin/${GOOS}
 
-        echo "Removing the binaries"
-        rm -rf tests/bin/${GOOS}/
-        mkdir -p tests/bin/${GOOS}
+          echo "Building binaries for testing update"
+          echo
 
-        echo "Building binaries for testing update"
-        echo
+          # source install
+          GIT_TAG="${GIT_TAG}" go build \
+            -ldflags="\
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=source'" \
+            -o "tests/bin/${GOOS}/source-install"
 
-        # source install
-        GIT_TAG="${GIT_TAG}" go build \
-          -ldflags="\
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=source'" \
-          -o "tests/bin/${GOOS}/source-install"
+          # go install
+          GIT_TAG="${GIT_TAG}" go build \
+            -ldflags="\
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
+            -o "tests/bin/${GOOS}/go-install"
 
-        # go install
-        GIT_TAG="${GIT_TAG}" go build \
-          -ldflags="\
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
-          -o "tests/bin/${GOOS}/go-install"
+          # homebrew install
+          GIT_TAG="${GIT_TAG}" go build \
+            -ldflags="\
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=homebrew'" \
+            -o "tests/bin/${GOOS}/homebrew-install"
 
-        # homebrew install
-        GIT_TAG="${GIT_TAG}" go build \
-          -ldflags="\
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=homebrew'" \
-          -o "tests/bin/${GOOS}/homebrew-install"
+          go clean -cache
 
-        go clean -cache
-
-        go test -v -p 1 ./tests/cmd/... \
-          -ldflags="\
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
-          " ./... | grep -v '\[no test files\]'
+          go test -v -p 1 ./tests/cmd/... \
+            -ldflags="\
+              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+            " ./... | grep -v '\[no test files\]'
 
       - name: Run tests
         if: runner.os == 'Windows'
