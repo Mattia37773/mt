@@ -11,7 +11,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -229,28 +228,31 @@ func updateWindows(out io.Writer, url string) error {
 
 	zipPath := filepath.Join(tmpDir, "mt-update.zip")
 	newExePath := filepath.Join(tmpDir, "mt-new.exe")
-	helperPath := filepath.Join(tmpDir, "mt-update.bat")
 
 	resp, err := http.Get(url)
 	if err != nil {
-		return fmt.Errorf("download failed", err)
+		return fmt.Errorf("download failed: %w", err)
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download update: HTTP %s", resp.Status)
+	}
+
 	f, err := os.Create(zipPath)
 	if err != nil {
-		return fmt.Errorf("creation of zip file failed", err)
+		return fmt.Errorf("creation of zip file failed: %w", err)
 	}
 
 	_, err = io.Copy(f, resp.Body)
 	f.Close()
 	if err != nil {
-		return fmt.Errorf("writing the zip file failed", err)
+		return fmt.Errorf("writing the zip file failed: %w", err)
 	}
 
 	r, err := zip.OpenReader(zipPath)
 	if err != nil {
-		return fmt.Errorf("opening the zip failed", err)
+		return fmt.Errorf("opening the zip failed: %w", err)
 	}
 	defer r.Close()
 
@@ -265,15 +267,15 @@ func updateWindows(out io.Writer, url string) error {
 				return fmt.Errorf("%s", err)
 			}
 
-			out, err := os.Create(newExePath)
+			outExe, err := os.Create(newExePath)
 			if err != nil {
 				rc.Close()
 				return fmt.Errorf("%s", err)
 			}
 
-			_, err = io.Copy(out, rc)
+			_, err = io.Copy(outExe, rc)
 
-			out.Close()
+			outExe.Close()
 			rc.Close()
 
 			if err != nil {
@@ -286,35 +288,23 @@ func updateWindows(out io.Writer, url string) error {
 	}
 
 	if !found {
-		return fmt.Errorf("no exe found in zip", found)
+		return fmt.Errorf("no exe found in zip")
 	}
 
-	// CMD helper
-	script := fmt.Sprintf(`
-@echo off
-timeout /t 2 /nobreak > nul
-
-:loop
-tasklist | find /i "mt.exe" > nul
-if not errorlevel 1 (
-    timeout /t 1 > nul
-    goto loop
-)
-
-move /Y "%s" "%s"
-start "" "%s"
-`, newExePath, exePath, exePath)
-
-	err = os.WriteFile(helperPath, []byte(script), 0644)
+	oldExePath := exePath + ".old"
+	_ = os.Remove(oldExePath)
+	err = os.Rename(exePath, oldExePath)
 	if err != nil {
-		return fmt.Errorf("helper write failed: %s", err)
+		return fmt.Errorf("failed to replace binary: %w", err)
 	}
 
-	cmd := exec.Command("cmd", "/C", helperPath)
-	err = cmd.Start()
+	err = os.Rename(newExePath, exePath)
 	if err != nil {
-		return fmt.Errorf("helper start failed: %s", err)
+		_ = os.Rename(oldExePath, exePath)
+		return fmt.Errorf("failed to install new binary: %w", err)
 	}
+
+	_ = os.Remove(oldExePath)
 	successfullyUpdated(out)
 	return nil
 }

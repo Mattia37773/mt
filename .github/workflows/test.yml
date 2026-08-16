@@ -68,10 +68,12 @@ jobs:
           net start docker || true
 
       # * --- verify SETUP (docker) ---
-      - name: Verify Docker Setup
+      - name: Versopm Overview
         run: |
+          go version
           docker --version
           docker compose version
+          git --version
 
       # * --- TESTSUITE ---
       - name: Run Testsuite (macos & linux)
