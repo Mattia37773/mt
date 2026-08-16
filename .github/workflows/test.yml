@@ -46,6 +46,7 @@ jobs:
           print_diagnostics: false  
         
       - name: Fix Docker DNS Settings
+        if: runner.os == 'macOS'
         run: |
           # Docker Engine Konfiguration mit Google/Cloudflare DNS anlegen/erweitern
           sudo mkdir -p /etc/docker
