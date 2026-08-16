@@ -83,9 +83,7 @@ func testStartCmd(t *testing.T) {
 	expectedContainers := []string{
 		config.ProjectConfig.ProjectName + "-db",
 		config.ProjectConfig.ProjectName + "-fpm",
-		config.ProjectConfig.ProjectName + "-mailpit",
 		config.ProjectConfig.ProjectName + "-nginx",
-		config.ProjectConfig.ProjectName + "-phpmyadmin",
 	}
 
 	base.WaitForContainersRunning(t, expectedContainers, 3*time.Minute)
@@ -152,7 +150,7 @@ func testConsole(t *testing.T) {
 
 func testDestroy(t *testing.T) {
 	base.ChangeDirToSymfony(t)
-	db := config.GetDbConfig()
+	db, _ := config.GetDbConfig()
 
 	// // delete vendor directory
 	// vendorErr := os.RemoveAll("vendor")

@@ -12,7 +12,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-26-intel,windows-latest]#ubuntu-latest# #macos-26-intel,
+      # TODO macos 
+      # todo windows
+        os: [ubuntu-latest,macos-26-intel,windows-latest]# macos-26-intel, windows-latest
 
     runs-on: ${{ matrix.os }}
 
@@ -71,54 +73,90 @@ jobs:
           docker compose version
 
       # * --- TESTSUITE ---
-      - name: Running Testsuite
+      - name: Run Testsuite (macos & linux)
+        if: runner.os == 'macOS' || runner.os == 'Linux'
         run: |
-          echo "Testing with unittests..."
-          echo
 
-          # Dateiendung für Windows berücksichtigen (.exe)
-          EXE=""
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            EXE=".exe"
-          fi
+        GOOS="$(go env GOOS)"
 
-          mkdir -p tests/bin
+        echo "Testing with unittests..."
+        echo
 
-          echo "Removing old binaries"
-          rm -f tests/bin/homebrew-install$EXE
-          rm -f tests/bin/go-install$EXE
-          rm -f tests/bin/source-install$EXE
+        echo "Removing the binaries"
+        rm -rf tests/bin/${GOOS}/
+        mkdir -p tests/bin/${GOOS}
 
-          echo "Building binaries for testing update"
-          echo
+        echo "Building binaries for testing update"
+        echo
+
+        # source install
+        GIT_TAG="${GIT_TAG}" go build \
+          -ldflags="\
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=source'" \
+          -o "tests/bin/${GOOS}/source-install"
+
+        # go install
+        GIT_TAG="${GIT_TAG}" go build \
+          -ldflags="\
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
+          -o "tests/bin/${GOOS}/go-install"
+
+        # homebrew install
+        GIT_TAG="${GIT_TAG}" go build \
+          -ldflags="\
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=homebrew'" \
+          -o "tests/bin/${GOOS}/homebrew-install"
+
+        go clean -cache
+
+        go test -v -p 1 ./tests/cmd/... \
+          -ldflags="\
+            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
+          " ./... | grep -v '\[no test files\]'
+
+      - name: Run tests
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $GOOS = go env GOOS
+
+          Write-Host "GOOS=$GOOS"
+          Write-Host "Testing with unittests..."
+          Write-Host ""
+
+          Write-Host "Removing the binaries"
+          Remove-Item -Recurse -Force "tests/bin/$GOOS" -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path "tests/bin/$GOOS" | Out-Null
+
+          Write-Host "Building binaries for testing update"
+          Write-Host ""
 
           # source install
-          go build \
-            -ldflags="\
-              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
-              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=source'" \
-            -o tests/bin/source-install$EXE
+          $env:GIT_TAG = "${{ env.GIT_TAG }}"
+          go build `
+            -ldflags="-X '${{ env.MODULE_PATH }}/${{ env.APP_NAME }}/config.OverrideCurrentVersion=v1.0.0' -X '${{ env.MODULE_PATH }}/${{ env.APP_NAME }}/config.OverrideBuildMethod=source'" `
+            -o "tests/bin/$GOOS/source-install.exe"
 
           # go install
-          go build \
-            -ldflags="\
-              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
-            -o tests/bin/go-install$EXE
+          go build `
+            -ldflags="-X '${{ env.MODULE_PATH }}/${{ env.APP_NAME }}/config.OverrideCurrentVersion=v1.0.0'" `
+            -o "tests/bin/$GOOS/go-install.exe"
 
           # homebrew install
-          go build \
-            -ldflags="\
-              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0' \
-              -X '${MODULE_PATH}/${APP_NAME}/config.OverrideBuildMethod=homebrew'" \
-            -o tests/bin/homebrew-install$EXE
+          go build `
+            -ldflags="-X '${{ env.MODULE_PATH }}/${{ env.APP_NAME }}/config.OverrideCurrentVersion=v1.0.0' -X '${{ env.MODULE_PATH }}/${{ env.APP_NAME }}/config.OverrideBuildMethod=homebrew'" `
+            -o "tests/bin/$GOOS/homebrew-install.exe"
 
           go clean -cache
-          go test -v -p 1 ./tests/cmd/... -ldflags="\
-            -X '${MODULE_PATH}/${APP_NAME}/config.OverrideCurrentVersion=v1.0.0'" \
-            ./... 
 
-          echo "Removing the binaries"
-          rm -f tests/bin/homebrew-install$EXE
-          rm -f tests/bin/go-install$EXE
-          rm -f tests/bin/source-install$EXE
+          go test -v -p 1 ./tests/cmd/... `
+            -ldflags="-X '${{ env.MODULE_PATH }}/${{ env.APP_NAME }}/config.OverrideCurrentVersion=v1.0.0'" `
+            ./... | Where-Object { $_ -notmatch '\[no test files\]' }
+
+          if ($LASTEXITCODE -ne 0) {
+            exit $LASTEXITCODE
+          }
+
 # todo glangci job

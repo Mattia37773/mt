@@ -5,6 +5,7 @@ package docker
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os/exec"
 	"strings"
@@ -50,7 +51,12 @@ func GetContainerStartedAt(containerName string) string {
 }
 
 func CommandExistsInContainer(container string, command string) bool {
-	cmd := exec.Command("docker", "exec", container, "sh", "-c", "command -v "+command)
+	fields := strings.Fields(command)
+	if len(fields) == 0 {
+		return false
+	}
+	binary := fields[0]
+	cmd := exec.Command("docker", "exec", container, "sh", "-c", "command -v "+binary)
 	err := cmd.Run()
 	if err != nil {
 		return false
@@ -58,11 +64,11 @@ func CommandExistsInContainer(container string, command string) bool {
 	return true
 }
 
-func ContainerExists(name string) (bool, error) {
+func ContainerExits(out io.Writer, name string) (bool, error) {
 	cmd := exec.Command("docker", "ps", "-a", "--format", "{{.Names}}")
 	output, err := cmd.Output()
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("Somehting is wrong with the contaner %s \n, %s", name, err)
 	}
 
 	containers := strings.Split(string(output), "\n")
@@ -72,5 +78,5 @@ func ContainerExists(name string) (bool, error) {
 		}
 	}
 
-	return false, err
+	return false, fmt.Errorf("The Container: %s doesn't exist \nDid you forget to run mt stack start?", name)
 }

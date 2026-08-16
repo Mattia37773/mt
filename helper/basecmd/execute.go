@@ -50,9 +50,12 @@ func ExecuteMainCommand(out io.Writer, baseCommand string, args []string) ([]str
 func BaseCommandGen(out io.Writer, baseCommand string, container string, checkCommandExist bool, args []string) ([]string, error) {
 	var projectName string = config.ProjectConfig.ProjectName
 
-	// Normal unittest run without docker
 	if checkCommandExist != false {
-		CheckContainerExits(out, projectName+"-"+container)
+		_, containerErr := docker.ContainerExits(out, projectName+"-"+container)
+		if containerErr != nil {
+			return nil, containerErr
+		}
+
 		commandExists := docker.CommandExistsInContainer(projectName+"-"+container, baseCommand)
 		if commandExists == false {
 			return nil, fmt.Errorf("The command: %s isn't available inside the %s", baseCommand, container)
@@ -93,19 +96,6 @@ func ExecuteHostCommand(out io.Writer, execArgs []string) {
 	cmd.Stdin = os.Stdin
 
 	shell.ExecuteCommand(cmd)
-}
-
-// only print errors to screen
-func ExecuteCommandOnlyErrors(out io.Writer, execArgs []string) {
-	cmd := exec.Command("docker", execArgs...)
-
-	cmd.Stdout = out
-	cmd.Stderr = out
-
-	err := shell.ExecuteCommandOnlyErrors(cmd)
-	if err != "" {
-		fmt.Println("Error:", err)
-	}
 }
 
 func StackExecute(out io.Writer, execArgs []string, successText string) error {

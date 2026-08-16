@@ -5,12 +5,12 @@ package shell
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 )
-
-// TODO try to get rid of all except one and try to handle the outut via byte buffers
 
 func ExecuteCommand(cmd *exec.Cmd) error {
 	if cmd.Stdout == nil {
@@ -68,27 +68,20 @@ func ExecuteCommandReturn(cmd *exec.Cmd) (string, error) {
 	return stdoutBuf.String(), nil
 }
 
-func ExecuteCommandOnlyErrors(cmd *exec.Cmd) string {
+func ExecuteCommandOnlyErrors(execArgs []string) error {
+	cmd := exec.Command(execArgs[0], execArgs[1:]...)
 	var stderrBuf bytes.Buffer
-	var out bytes.Buffer
 
-	cmd.Stdout = &out
+	cmd.Stdout = io.Discard
 	cmd.Stderr = &stderrBuf
-	cmd.Stdin = os.Stdin
 
-	err := cmd.Run()
-
+	err := ExecuteCommand(cmd)
 	if err != nil {
-		fmt.Println()
-
 		if stderrBuf.Len() > 0 {
-			return stderrBuf.String()
+			return errors.New(stderrBuf.String())
 		}
-		// if out.Len() > 0 {
-		// 	fmt.Println("Output:", out.String())
-		// }
-
-		os.Exit(1)
+		return err
 	}
-	return ""
+
+	return nil
 }

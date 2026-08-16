@@ -7,7 +7,6 @@ services:
             dockerfile: ./php/Dockerfile
         volumes:
             - ../:/app/
-            - fpm_node_modules:/app/node_modules
             - ./php/php.ini:/usr/local/etc/php/conf.d/custom.ini
         depends_on:
             - db
@@ -18,8 +17,6 @@ services:
             - APP_DEBUG=true
         ports:
             - "9000:9000"
-            - "9003:9003"
-            - "5173:5173"
         extra_hosts:
             - "host.docker.internal:host-gateway"
         networks:
@@ -54,37 +51,21 @@ services:
         networks:
             - app-network
 
-    phpmyadmin:
-        container_name: ${PROJECT_NAME}-phpmyadmin
-        image: phpmyadmin:latest
-        environment:
-            PMA_HOST: db
-            PMA_USER: uDb
-            PMA_PASSWORD: ${PMA_PASSWORD}
-            UPLOAD_LIMIT: 100M
-        depends_on:
-            - db
-        ports:
-            - "8081:80"
-        networks:
-            - app-network
-
-    mailpit:
-        container_name: ${PROJECT_NAME}-mailpit
-        image: axllent/mailpit:latest
-        ports:
-            - "8025:8025"
-            - "1025:1025"
-        restart: unless-stopped
-        environment:
-            - MP_MAX_MESSAGES=500
-            - MP_SMTP_AUTH_ALLOW_INSECURE=true
-        networks:
-            - app-network
+    # mailpit:
+    #     container_name: ${PROJECT_NAME}-mailpit
+    #     image: axllent/mailpit:latest
+    #     ports:
+    #         - "8025:8025"
+    #         - "1025:1025"
+    #     restart: unless-stopped
+    #     environment:
+    #         - MP_MAX_MESSAGES=500
+    #         - MP_SMTP_AUTH_ALLOW_INSECURE=true
+    #     networks:
+    #         - app-network
 
 volumes:
     db-data:
-    fpm_node_modules:
 
 networks:
     app-network:

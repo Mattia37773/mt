@@ -4,12 +4,11 @@ Copyright © 2026 Matze
 package single
 
 import (
-	"bytes"
 	"os/exec"
 	"runtime"
 	"testing"
 
-	"github.com/mattia37773/mt/cmd"
+	_ "github.com/mattia37773/mt/cmd"
 	"github.com/mattia37773/mt/config"
 	_ "github.com/mattia37773/mt/config"
 	base "github.com/mattia37773/mt/tests/basetest"
@@ -18,40 +17,31 @@ import (
 
 func TestUpdateFromSource(t *testing.T) {
 	base.ChangeDirToBin(t)
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
 
 	binary := "./source-install"
 	if runtime.GOOS == "windows" {
 		binary += ".exe"
 	}
 
-	// updateRejectCmd := exec.Command("../../bin/source-install", "update", "--confirm=false")
-	// updateRejectOut, _ := updateRejectCmd.Output()
-
-	// assert.Contains(t, base.StripANSI(string(updateRejectOut)),
-	// 	"mt version v1.0.0",
-	// )
-
 	versionCmd := exec.Command(binary, "--version")
-	versionOut, _ := versionCmd.Output()
+	versionOut, err := versionCmd.CombinedOutput()
+	assert.NoError(t, err)
 
 	assert.Contains(t, base.StripANSI(string(versionOut)),
 		"mt version v1.0.0",
 	)
 
 	updateCmd := exec.Command(binary, "update", "--confirm")
-	updateOut, _ := updateCmd.Output()
+	updateOut, err := updateCmd.CombinedOutput()
+	assert.NoError(t, err)
 
 	assert.Contains(t, base.StripANSI(string(updateOut)),
 		"Successfully Updated the Cli to version: ",
 	)
 
 	updateAfterCmd := exec.Command(binary, "update", "--confirm")
-	updateAfterOut, _ := updateAfterCmd.Output()
+	updateAfterOut, err := updateAfterCmd.CombinedOutput()
+	assert.NoError(t, err)
 
 	assert.Contains(t, base.StripANSI(string(updateAfterOut)),
 		"The Newest Version is already installed",
@@ -60,11 +50,6 @@ func TestUpdateFromSource(t *testing.T) {
 
 func TestUpdateGo(t *testing.T) {
 	base.ChangeDirToBin(t)
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
 
 	binary := "./go-install"
 	if runtime.GOOS == "windows" {
@@ -72,23 +57,18 @@ func TestUpdateGo(t *testing.T) {
 	}
 
 	updateCmd := exec.Command(binary, "update", "--confirm")
-	updateOut, _ := updateCmd.Output()
+	updateOut, err := updateCmd.CombinedOutput()
+	assert.NoError(t, err)
 
-	assert.Contains(t, base.StripANSI(string(updateOut)),
-		"Installed via go",
-		"Please update with the follwing commands",
-		"clear the package cache: go clean -modcache",
-		"install the update: go install "+config.AppConfig.ModulePath+"@latest",
-	)
+	cleanOutput := base.StripANSI(string(updateOut))
+	assert.Contains(t, cleanOutput, "Installed via go")
+	assert.Contains(t, cleanOutput, "Please update with the follwing commands")
+	assert.Contains(t, cleanOutput, "clear the package cache: go clean -modcache")
+	assert.Contains(t, cleanOutput, "install the update: go install "+config.AppConfig.ModulePath+"@latest")
 }
 
 func TestUpdateHomebrew(t *testing.T) {
 	base.ChangeDirToBin(t)
-	rootCmd := cmd.RootCmd
-
-	buf := new(bytes.Buffer)
-	rootCmd.SetOut(buf)
-	rootCmd.SetErr(buf)
 
 	binary := "./homebrew-install"
 	if runtime.GOOS == "windows" {
@@ -96,10 +76,10 @@ func TestUpdateHomebrew(t *testing.T) {
 	}
 
 	updateCmd := exec.Command(binary, "update", "--confirm")
-	updateOut, _ := updateCmd.Output()
+	updateOut, err := updateCmd.CombinedOutput()
+	assert.NoError(t, err)
 
-	assert.Contains(t, base.StripANSI(string(updateOut)),
-		"Installed via Homebrew.",
-		"Please update with: brew upgrade mt",
-	)
+	cleanOutput := base.StripANSI(string(updateOut))
+	assert.Contains(t, cleanOutput, "Installed via Homebrew.")
+	assert.Contains(t, cleanOutput, "Please update with: brew upgrade mt")
 }

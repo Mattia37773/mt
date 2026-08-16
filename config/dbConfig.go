@@ -5,7 +5,6 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"slices"
 )
 
@@ -37,25 +36,21 @@ func getMongoDbConfig() DbConfig {
 	}
 }
 
-func GetDbConfig() DbConfig {
+func GetDbConfig() (DbConfig, error) {
 
 	var dbType string = ProjectConfig.DB.Provider
 	allowdTypes := []string{"mysql", "mongo"}
 	if !slices.Contains(allowdTypes, dbType) {
-		fmt.Printf("\033[31mIError: nvalid Argument %s is not a supported DB. Choose a supported db type %s file\033[0m \n", dbType, allowdTypes)
-		// TODO remove exit & return error instead
-		os.Exit(1)
+		return DbConfig{}, fmt.Errorf("Invalid Argument %s is not a supported DB. Choose a supported db type %s file\n", dbType, allowdTypes)
 	}
 
 	if dbType == "mysql" {
-		return getMysqlDbConfig()
+		return getMysqlDbConfig(), nil
 	}
 
 	if dbType == "mongo" {
-		return getMongoDbConfig()
+		return getMongoDbConfig(), nil
 	}
 
-	// only here for the compiler.
-	// this location should never be reached
-	return DbConfig{}
+	return DbConfig{}, fmt.Errorf("Invalid Argument %s is not a supported DB. Choose a supported db type %s file\n", dbType, allowdTypes)
 }

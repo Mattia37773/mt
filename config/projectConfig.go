@@ -13,7 +13,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type ConfigStruct struct {
+type configStruct struct {
 	ProjectName string `yaml:"projectName"`
 
 	Paths struct {
@@ -42,7 +42,11 @@ type ConfigStruct struct {
 	} `yaml:"main"`
 }
 
-var ProjectConfig ConfigStruct
+var ProjectConfig configStruct
+
+//
+// Gets the Config from yaml
+//
 
 func ParseConfigFile() error {
 

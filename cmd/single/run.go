@@ -9,6 +9,7 @@ import (
 	"github.com/mattia37773/mt/cmd"
 	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
+	"github.com/mattia37773/mt/helper/docker"
 
 	"github.com/spf13/cobra"
 )
@@ -22,7 +23,12 @@ var runCmd = &cobra.Command{
 	RunE: func(c *cobra.Command, args []string) error {
 		out := c.OutOrStdout()
 
-		containerErr := basecmd.CheckContainerExits(out, config.ProjectConfig.ProjectName+"-"+config.ProjectConfig.Main.ContainerName)
+		projectName, projectNameErr := basecmd.ValidateProjectName(out)
+		if projectNameErr != nil {
+			return projectNameErr
+		}
+
+		_, containerErr := docker.ContainerExits(out, projectName+"-"+config.ProjectConfig.Main.ContainerName)
 		if containerErr != nil {
 			return containerErr
 		}

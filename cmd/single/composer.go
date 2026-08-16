@@ -9,6 +9,7 @@ import (
 	"github.com/mattia37773/mt/cmd"
 	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
+	"github.com/mattia37773/mt/helper/docker"
 	"github.com/spf13/cobra"
 )
 
@@ -19,8 +20,12 @@ var composerCmd = &cobra.Command{
 	DisableFlagsInUseLine: true,
 	RunE: func(c *cobra.Command, args []string) error {
 		out := c.OutOrStdout()
+		projectName, projectNameErr := basecmd.ValidateProjectName(out)
+		if projectNameErr != nil {
+			return projectNameErr
+		}
 
-		containerErr := basecmd.CheckContainerExits(out, config.ProjectConfig.ProjectName+"-"+config.ProjectConfig.Backend.ContainerName)
+		_, containerErr := docker.ContainerExits(out, projectName+"-"+config.ProjectConfig.Backend.ContainerName)
 		if containerErr != nil {
 			return containerErr
 		}

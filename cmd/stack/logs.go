@@ -10,6 +10,7 @@ import (
 
 	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
+	"github.com/mattia37773/mt/helper/docker"
 	"github.com/mattia37773/mt/ui/text"
 
 	"github.com/spf13/cobra"
@@ -38,9 +39,8 @@ var logsCmd = &cobra.Command{
 }
 
 func init() {
-	StackCmd.AddCommand(logsCmd)
-
 	logsCmd.Flags().BoolVarP(&followLogs, "follow", "f", false, "Follow log output")
+	StackCmd.AddCommand(logsCmd)
 }
 
 func logsStack(out io.Writer, follow bool, service string) ([]string, error) {
@@ -55,7 +55,10 @@ func logsStack(out io.Writer, follow bool, service string) ([]string, error) {
 		return []string{}, err
 	}
 
-	basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.Main.ContainerName)
+	_, containerErr := docker.ContainerExits(out, projectName+"-"+config.ProjectConfig.Main.ContainerName)
+	if containerErr != nil {
+		return nil, containerErr
+	}
 
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 	fmt.Fprintln(out, "")
@@ -70,7 +73,6 @@ func logsStack(out io.Writer, follow bool, service string) ([]string, error) {
 	if service != "" {
 		execArgs = append(execArgs, service)
 	}
-	fmt.Println([]string{"sh", "-c", strings.Join(execArgs, " ")})
 
 	return []string{"sh", "-c", strings.Join(execArgs, " ")}, nil
 }

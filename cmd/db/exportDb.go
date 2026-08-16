@@ -6,10 +6,11 @@ package db
 import (
 	"fmt"
 	"io"
-	"os/exec"
 
 	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
+	"github.com/mattia37773/mt/helper/docker"
+	"github.com/mattia37773/mt/helper/shell"
 	"github.com/mattia37773/mt/ui/text"
 	"github.com/spf13/cobra"
 )
@@ -35,8 +36,12 @@ func init() {
 }
 
 func exportExecute(out io.Writer, args []string) error {
+	projectName, projectNameErr := basecmd.ValidateProjectName(out)
+	if projectNameErr != nil {
+		return projectNameErr
+	}
 
-	containerErr := basecmd.CheckContainerExits(out, config.ProjectConfig.ProjectName+"-"+config.ProjectConfig.DB.ContainerName)
+	_, containerErr := docker.ContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
 	if containerErr != nil {
 		return containerErr
 	}
@@ -46,17 +51,23 @@ func exportExecute(out io.Writer, args []string) error {
 		return exportGenError
 	}
 
-	basecmd.ExecuteCommandOnlyErrors(out, cmd)
+	dockerCmd := append([]string{"docker"}, cmd...)
+	exportGenExecErr := shell.ExecuteCommandOnlyErrors(dockerCmd)
+	if exportGenExecErr != nil {
+		return exportGenExecErr
+	}
 
-	//copy := exec.Command("docker", "cp", projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype, "./")
 	copyArgs := copyExportGen(out)
-	copyExportCommand := exec.Command(copyArgs[0], copyArgs[1:]...)
-	copyExportCommand.Output()
+	copyCmdExecErr := shell.ExecuteCommandOnlyErrors(copyArgs)
+	if copyCmdExecErr != nil {
+		return copyCmdExecErr
+	}
 
-	//rm := exec.Command("docker", "exec", projectName+"-"+config.ProjectConfig.DB.ContainerName, "rm", "-rf", "/tmp/"+projectName+db.Filetype)
 	removeArgs := removeExportGen(out)
-	removeExportCmd := exec.Command(removeArgs[0], removeArgs[1:]...)
-	removeExportCmd.Output()
+	removeExecErr := shell.ExecuteCommandOnlyErrors(removeArgs)
+	if removeExecErr != nil {
+		return removeExecErr
+	}
 
 	fmt.Fprint(out, text.Green("Created Dump Successfully\n"))
 
@@ -64,12 +75,17 @@ func exportExecute(out io.Writer, args []string) error {
 }
 
 func exportGen(out io.Writer, args []string) ([]string, error) {
-	return basecmd.ExecuteDbCommand(out, config.GetDbConfig().Export, args)
+	db, dbError := config.GetDbConfig()
+	if dbError != nil {
+		return []string{}, dbError
+	}
+	return basecmd.ExecuteDbCommand(out, db.Export, args)
 }
 
 func copyExportGen(out io.Writer) []string {
 	var projectName string = config.ProjectConfig.ProjectName
-	var db config.DbConfig = config.GetDbConfig()
+	db, _ := config.GetDbConfig()
+
 	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
 
 	sourcePath := fmt.Sprintf("%s:/tmp/%s%s", containerName, projectName, db.Filetype)
@@ -79,7 +95,8 @@ func copyExportGen(out io.Writer) []string {
 
 func removeExportGen(out io.Writer) []string {
 	var projectName string = config.ProjectConfig.ProjectName
-	var db config.DbConfig = config.GetDbConfig()
+	db, _ := config.GetDbConfig()
+
 	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
 
 	targetFile := fmt.Sprintf("/tmp/%s%s", projectName, db.Filetype)

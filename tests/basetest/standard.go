@@ -6,6 +6,7 @@ package base
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/mattia37773/mt/config"
@@ -37,6 +38,15 @@ func ChangeDirToSymfony(t *testing.T) {
 
 func ChangeDirToDefaultConfig(t *testing.T) {
 	dir := rootDir([]string{"tests", "projects", "defaultConfig"})
+	t.Chdir(dir)
+	config.ParseConfigFile()
+}
+
+func ChangeDir(t *testing.T, pathSegments ...string) {
+	base := []string{"tests", "projects"}
+	fullPath := append(base, pathSegments...)
+	dir := rootDir(fullPath)
+
 	t.Chdir(dir)
 	config.ParseConfigFile()
 }
@@ -81,7 +91,7 @@ func ChangeDirToNoConfigFilWithError(t *testing.T) {
 
 // binary path for updates
 func ChangeDirToBin(t *testing.T) {
-	dir := rootDir([]string{"tests", "bin"})
+	dir := rootDir([]string{"tests", "bin", runtime.GOOS})
 	t.Chdir(dir)
 	config.ParseConfigFile()
 }

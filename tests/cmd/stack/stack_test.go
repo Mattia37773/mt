@@ -18,58 +18,79 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStack(t *testing.T) {
-
-	t.Run("Start", func(t *testing.T) {
-		testStartCmd(t)
-	})
-
-	t.Run("Restart", func(t *testing.T) {
-		testRestartCmd(t)
-	})
-
-	t.Run("Ps", func(t *testing.T) {
-		testPsCmd(t)
-	})
-
-	t.Run("Logs", func(t *testing.T) {
-		testLogsCmd(t)
-	})
-
-	t.Run("Fpm Logs", func(t *testing.T) {
-		testLogsCmdSpecificContainer(t)
-	})
-
-	t.Run("Stop", func(t *testing.T) {
-		testStopCmd(t)
-	})
-
-	t.Run("StartAgain", func(t *testing.T) {
-		testStartCmd(t)
-	})
-
-	t.Run("Destory", func(t *testing.T) {
-		testDestroyCmd(t)
-	})
+// TODO add os specific flags
+type stackConfig struct {
+	containers  []string
+	ProjectPath string
 }
 
-func testStartCmd(t *testing.T) {
-	base.ChangeDirToSymfony(t)
+type testCase struct {
+	name   string
+	config stackConfig
+}
+
+// TODO choose a much smaler test project ;=}
+func TestStack(t *testing.T) {
+	testCases := []testCase{
+		{
+			name: "Symfony",
+			config: stackConfig{
+				containers: []string{
+					"db",
+					"fpm",
+					"nginx",
+				},
+				ProjectPath: "symfony",
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name+" Start Stack", func(t *testing.T) {
+			testStartCmd(t, tc)
+		})
+
+		t.Run(tc.name+" PS", func(t *testing.T) {
+			testPsCmd(t, tc)
+		})
+
+		t.Run(tc.name+" Logs", func(t *testing.T) {
+			testLogsCmd(t, tc)
+		})
+
+		t.Run(tc.name+" Logs With Container Flag", func(t *testing.T) {
+			testLogsCmdSpecificContainer(t, tc)
+		})
+
+		t.Run(tc.name+" Restart Stack", func(t *testing.T) {
+			testRestartCmd(t, tc)
+		})
+
+		t.Run(tc.name+" Stop Stack", func(t *testing.T) {
+			testStopCmd(t, tc)
+		})
+
+		t.Run(tc.name+" Destroy Stack", func(t *testing.T) {
+			testDestroyCmd(t, tc)
+		})
+	}
+}
+
+func testStartCmd(t *testing.T, tc testCase) {
+	base.ChangeDir(t, tc.config.ProjectPath)
+
+	// create the containernames
+	expected := make([]string, len(tc.config.containers))
+	for i, name := range tc.config.containers {
+		expected[i] = config.ProjectConfig.ProjectName + "-" + name
+	}
 
 	rootCmd := cmd.RootCmd
 	base.SilentCommand(t, rootCmd, []string{"stack", "start"})
 
-	expectedContainers := []string{
-		config.ProjectConfig.ProjectName + "-db",
-		config.ProjectConfig.ProjectName + "-fpm",
-		config.ProjectConfig.ProjectName + "-mailpit",
-		config.ProjectConfig.ProjectName + "-nginx",
-		config.ProjectConfig.ProjectName + "-phpmyadmin",
-	}
+	base.WaitForContainersRunning(t, expected, 3*time.Minute)
 
-	base.WaitForContainersRunning(t, expectedContainers, 3*time.Minute)
-
-	for _, container := range expectedContainers {
+	for _, container := range expected {
 		container := container
 		t.Run("Check_Container_"+container, func(t *testing.T) {
 			running := docker.IsContainerRunning(container)
@@ -78,8 +99,14 @@ func testStartCmd(t *testing.T) {
 	}
 }
 
-func testPsCmd(t *testing.T) {
-	base.ChangeDirToSymfony(t)
+func testPsCmd(t *testing.T, tc testCase) {
+	base.ChangeDir(t, tc.config.ProjectPath)
+
+	// create the containernames
+	expected := make([]string, len(tc.config.containers))
+	for i, name := range tc.config.containers {
+		expected[i] = config.ProjectConfig.ProjectName + "-" + name
+	}
 
 	rootCmd := cmd.RootCmd
 
@@ -96,21 +123,13 @@ func testPsCmd(t *testing.T) {
 	assert.Contains(t, cleanOutput, "NAME", "Output should contain column header 'NAME'")
 	assert.Contains(t, cleanOutput, "STATUS", "Output should contain column header 'STATUS'")
 
-	expectedContainers := []string{
-		config.ProjectConfig.ProjectName + "-db",
-		config.ProjectConfig.ProjectName + "-fpm",
-		config.ProjectConfig.ProjectName + "-mailpit",
-		config.ProjectConfig.ProjectName + "-nginx",
-		config.ProjectConfig.ProjectName + "-phpmyadmin",
-	}
-
-	for _, container := range expectedContainers {
+	for _, container := range expected {
 		assert.Contains(t, cleanOutput, container, "The 'ps' output should contain container '%s'", container)
 	}
 }
 
-func testLogsCmd(t *testing.T) {
-	base.ChangeDirToSymfony(t)
+func testLogsCmd(t *testing.T, tc testCase) {
+	base.ChangeDir(t, tc.config.ProjectPath)
 
 	rootCmd := cmd.RootCmd
 
@@ -125,19 +144,13 @@ func testLogsCmd(t *testing.T) {
 
 	cleanOutput := base.StripANSI(buf.String())
 
-	expectedServices := []string{
-		"fpm",
-		"db",
-		"nginx",
-	}
-
-	for _, service := range expectedServices {
+	for _, service := range tc.config.containers {
 		assert.Contains(t, cleanOutput, service, "The logs output should contain entries from '%s'", service)
 	}
 }
 
-func testLogsCmdSpecificContainer(t *testing.T) {
-	base.ChangeDirToSymfony(t)
+func testLogsCmdSpecificContainer(t *testing.T, tc testCase) {
+	base.ChangeDir(t, tc.config.ProjectPath)
 
 	rootCmd := cmd.RootCmd
 
@@ -145,36 +158,30 @@ func testLogsCmdSpecificContainer(t *testing.T) {
 	rootCmd.SetOut(buf)
 	rootCmd.SetErr(buf)
 
-	rootCmd.SetArgs([]string{"stack", "logs", "fpm"})
+	rootCmd.SetArgs([]string{"stack", "logs", config.ProjectConfig.Main.ContainerName})
 
 	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
 	cleanOutput := base.StripANSI(buf.String())
 
-	expectedServices := []string{
-		"fpm",
-	}
-
-	for _, service := range expectedServices {
+	for _, service := range []string{config.ProjectConfig.Main.ContainerName} {
 		assert.Contains(t, cleanOutput, service, "The logs output should contain entries from '%s'", service)
 	}
 }
 
-func testRestartCmd(t *testing.T) {
-	base.ChangeDirToSymfony(t)
+func testRestartCmd(t *testing.T, tc testCase) {
+	base.ChangeDir(t, tc.config.ProjectPath)
 
-	expectedContainers := []string{
-		config.ProjectConfig.ProjectName + "-db",
-		config.ProjectConfig.ProjectName + "-fpm",
-		config.ProjectConfig.ProjectName + "-mailpit",
-		config.ProjectConfig.ProjectName + "-nginx",
-		config.ProjectConfig.ProjectName + "-phpmyadmin",
+	// create the containernames
+	expected := make([]string, len(tc.config.containers))
+	for i, name := range tc.config.containers {
+		expected[i] = config.ProjectConfig.ProjectName + "-" + name
 	}
 
-	// 1. Save start timestamps of all containers BEFORE restart
+	// Save start timestamps of all containers BEFORE restart
 	timestampsBefore := make(map[string]string)
-	for _, container := range expectedContainers {
+	for _, container := range expected {
 		startTime := docker.GetContainerStartedAt(container)
 		assert.NotEmpty(t, startTime, "Container '%s' must be running before test", container)
 		timestampsBefore[container] = startTime
@@ -191,7 +198,7 @@ func testRestartCmd(t *testing.T) {
 	err := base.ExecuteCommand(rootCmd)
 	assert.NoError(t, err)
 
-	for _, container := range expectedContainers {
+	for _, container := range expected {
 		container := container
 		t.Run("Check_Restart_"+container, func(t *testing.T) {
 			startTimeAfter := docker.GetContainerStartedAt(container)
@@ -203,21 +210,19 @@ func testRestartCmd(t *testing.T) {
 	}
 }
 
-func testStopCmd(t *testing.T) {
-	base.ChangeDirToSymfony(t)
+func testStopCmd(t *testing.T, tc testCase) {
+	base.ChangeDir(t, tc.config.ProjectPath)
+
+	// create the containernames
+	expected := make([]string, len(tc.config.containers))
+	for i, name := range tc.config.containers {
+		expected[i] = config.ProjectConfig.ProjectName + "-" + name
+	}
 
 	rootCmd := cmd.RootCmd
 	base.SilentCommand(t, rootCmd, []string{"stack", "stop"})
 
-	expectedContainers := []string{
-		config.ProjectConfig.ProjectName + "-db",
-		config.ProjectConfig.ProjectName + "-fpm",
-		config.ProjectConfig.ProjectName + "-mailpit",
-		config.ProjectConfig.ProjectName + "-nginx",
-		config.ProjectConfig.ProjectName + "-phpmyadmin",
-	}
-
-	for _, container := range expectedContainers {
+	for _, container := range expected {
 		container := container
 		t.Run("Check_Container_DoesNotExist_"+container, func(t *testing.T) {
 			status := docker.GetContainerStatus(container)
@@ -227,23 +232,21 @@ func testStopCmd(t *testing.T) {
 	}
 }
 
-func testDestroyCmd(t *testing.T) {
-	base.ChangeDirToSymfony(t)
+func testDestroyCmd(t *testing.T, tc testCase) {
+	base.ChangeDir(t, tc.config.ProjectPath)
+
+	// create the containernames
+	expected := make([]string, len(tc.config.containers))
+	for i, name := range tc.config.containers {
+		expected[i] = config.ProjectConfig.ProjectName + "-" + name
+	}
 
 	projectName := config.ProjectConfig.ProjectName
 
 	rootCmd := cmd.RootCmd
 	base.SilentCommand(t, rootCmd, []string{"stack", "destroy"})
 
-	expectedContainers := []string{
-		projectName + "-db",
-		projectName + "-fpm",
-		projectName + "-mailpit",
-		projectName + "-nginx",
-		projectName + "-phpmyadmin",
-	}
-
-	for _, container := range expectedContainers {
+	for _, container := range expected {
 		container := container
 		t.Run("Check_Container_Removed_"+container, func(t *testing.T) {
 			status := docker.GetContainerStatus(container)
@@ -252,7 +255,6 @@ func testDestroyCmd(t *testing.T) {
 	}
 
 	t.Run("Check_Networks_Removed", func(t *testing.T) {
-		// Sucht nach Docker-Netzwerken, die mit dem Projektnamen matchen
 		networks := docker.GetNetworksByProject(projectName)
 		assert.Empty(t, networks, "All networks for project '%s' should be removed", projectName)
 	})

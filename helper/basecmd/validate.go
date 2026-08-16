@@ -12,7 +12,10 @@ import (
 )
 
 func ValidateProjectName(out io.Writer) (string, error) {
-	CheckConfigFile(out)
+	configFileErr := CheckConfigFile(out)
+	if configFileErr != nil {
+		return "", configFileErr
+	}
 
 	var projectName string = config.ProjectConfig.ProjectName
 
@@ -23,7 +26,10 @@ func ValidateProjectName(out io.Writer) (string, error) {
 }
 
 func ValidateContainer(out io.Writer, container string, containerType string) error {
-	CheckConfigFile(out)
+	configFileErr := CheckConfigFile(out)
+	if configFileErr != nil {
+		return configFileErr
+	}
 
 	if container == "" {
 		return fmt.Errorf("No %s container is set!!!\nPlease add it in .mt.yaml", containerType)
@@ -32,7 +38,10 @@ func ValidateContainer(out io.Writer, container string, containerType string) er
 }
 
 func ValidateDockerPath(out io.Writer) (string, error) {
-	CheckConfigFile(out)
+	configFileErr := CheckConfigFile(out)
+	if configFileErr != nil {
+		return "", configFileErr
+	}
 
 	var dockerPath string = config.ProjectConfig.Paths.DockerCompose
 

@@ -2,6 +2,8 @@ MODULE_PATH 	:= github.com/mattia37773
 APP_NAME        := mt
 BUILD_METHOD 	:= source
 GIT_TAG 		:= $(shell git describe --tags --always 2>/dev/null || echo "dev")
+GOOS   			?= $(shell go env GOOS)
+#GOARCH			?= $(shell go env GOARCH)
 
 .PHONY: test
 .PHONY: watch
@@ -33,9 +35,9 @@ test: check-docker-compose  ## Run the testsuite
 	@echo
 
 	@echo "Removing the binaries"
-	@rm -f tests/bin/homebrew-install
-	@rm -f tests/bin/go-install
-	@rm -f tests/bin/source-install
+	@rm -rf tests/bin/$(GOOS)/
+	@mkdir -p tests/bin
+	@mkdir -p tests/bin/$(GOOS)
 
 	@echo "Building binarie for testing update"
 	@echo
@@ -44,18 +46,18 @@ test: check-docker-compose  ## Run the testsuite
 		-ldflags="\
 			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 			-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=source'" \
-		-o tests/bin/source-install
+		-o tests/bin/$(GOOS)/source-install
 # go install
 	GIT_TAG=$(GIT_TAG) go build \
 	-ldflags="\
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0'" \
-	-o tests/bin/go-install
+	-o tests/bin/$(GOOS)/go-install
 # homebrew install
 	GIT_TAG=$(GIT_TAG) go build \
 	-ldflags="\
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideCurrentVersion=v1.0.0' \
 		-X '$(MODULE_PATH)/$(APP_NAME)/config.OverrideBuildMethod=homebrew'" \
-	-o tests/bin/homebrew-install
+	-o tests/bin/$(GOOS)/homebrew-install
 
 	go clean -cache
 	go test -v -p 1 ./tests/cmd/... -ldflags="\
@@ -64,9 +66,7 @@ test: check-docker-compose  ## Run the testsuite
 
 # removing the binaries
 	@echo "Removing the binaries"
-	@rm -f tests/bin/homebrew-install
-	@rm -f tests/bin/go-install
-	@rm -f tests/bin/source-install
+	@rm -rf tests/bin/$(GOOS)/
 
 test-basic: ## Run the testsuite wihout the verbose flag
 	@echo "Testing with unittests without verbose mode..."
@@ -76,6 +76,7 @@ test-basic: ## Run the testsuite wihout the verbose flag
 	@rm -f tests/bin/homebrew-install
 	@rm -f tests/bin/go-install
 	@rm -f tests/bin/source-install
+	@mkdir -p tests/bin
 
 	@echo "Building binarie for testing update"
 	@echo
@@ -117,6 +118,7 @@ test-cover: ## Show the test coverage
 	@rm -f tests/bin/homebrew-install
 	@rm -f tests/bin/go-install
 	@rm -f tests/bin/source-install
+	@mkdir -p tests/bin
 
 	@echo "Building binarie for testing update"
 	@echo

@@ -53,7 +53,7 @@ func init() {
 }
 
 func updateSingle(out io.Writer) error {
-	if config.Version == config.LatestVersion {
+	if config.LatestVersion == "" || config.Version == config.LatestVersion {
 		fmt.Fprintln(out, text.GlowPink(config.AppConfig.Logo))
 		fmt.Fprintln(out, text.Green("The Newest Version is already installed"))
 		return nil
@@ -85,12 +85,12 @@ func updateSingle(out io.Writer) error {
 		return nil
 	case "go":
 		// TODO define how thats done
-		cmd := `go install` + config.AppConfig.ModulePath + `@latest`
+		cmd := `go install ` + config.AppConfig.ModulePath + `@latest`
 
 		fmt.Fprintln(out, text.Green("Installed via go"))
 		fmt.Fprintln(out, "Please update with the follwing commands")
 		fmt.Fprintln(out, "clear the package cache: go clean -modcache")
-		fmt.Fprintf(out, "install the update: \"%s\"\n", cmd)
+		fmt.Fprintf(out, "install the update: %s\n", cmd)
 	case "homebrew":
 		fmt.Fprintln(out, text.Green("Installed via Homebrew."))
 		fmt.Fprintln(out, "Please update with: brew upgrade mt")
@@ -153,6 +153,10 @@ func updateMacLinux(out io.Writer, url string) error {
 		return fmt.Errorf("%s", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download update: HTTP %s", resp.Status)
+	}
 
 	// Gzip
 	gzr, err := gzip.NewReader(resp.Body)

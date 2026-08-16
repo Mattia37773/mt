@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
 
 	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
+	"github.com/mattia37773/mt/helper/docker"
 	"github.com/mattia37773/mt/helper/shell"
 	"github.com/mattia37773/mt/ui/form"
 	"github.com/mattia37773/mt/ui/text"
@@ -72,35 +72,39 @@ func init() {
 }
 
 func importExecute(out io.Writer, file string) error {
-	var projectName string = config.ProjectConfig.ProjectName
+	projectName, projectNameErr := basecmd.ValidateProjectName(out)
+	if projectNameErr != nil {
+		return projectNameErr
+	}
 
-	containerErr := basecmd.CheckContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
+	_, containerErr := docker.ContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
 	if containerErr != nil {
 		return containerErr
 	}
 
+	fmt.Fprintln(out, "")
 	fmt.Fprintf(out, text.Green("Project %s \n"), projectName)
 
 	// copy
-	copy := copyImportGen(out, file) //exec.Command("docker", "cp", "./"+file, projectName+"-"+config.ProjectConfig.DB.ContainerName+":/tmp/"+projectName+db.Filetype)
-	copyCmd := exec.Command(copy[0], copy[1:]...)
-	copyCmd.Stdout = out
-	copyCmd.Stderr = out
-	copyCmd.Stdin = os.Stdin
-	shell.ExecuteCommandOnlyErrors(copyCmd)
+	copy := copyImportGen(out, file)
+	copyCmdExecErr := shell.ExecuteCommandOnlyErrors(copy)
+	if copyCmdExecErr != nil {
+		return copyCmdExecErr
+	}
 
 	// import
-	execArgs := importGen(out, file)
-	cmd := exec.Command(execArgs[0], execArgs[1:]...)
-	cmd.Stdout = out
-	cmd.Stderr = out
-	cmd.Stdin = os.Stdin
-	shell.ExecuteCommandOnlyErrors(cmd)
+	importArgs := importGen(out, file)
+	importExecErr := shell.ExecuteCommandOnlyErrors(importArgs)
+	if importExecErr != nil {
+		return importExecErr
+	}
 
 	// delete
 	rmArgs := removeImportGen(out)
-	rmCmd := exec.Command(rmArgs[0], rmArgs[1:]...)
-	rmCmd.Output()
+	removeExecErr := shell.ExecuteCommandOnlyErrors(rmArgs)
+	if removeExecErr != nil {
+		return removeExecErr
+	}
 
 	fmt.Fprintf(out, text.Green("Imported the Database dump into %s\n"), projectName)
 
@@ -109,7 +113,7 @@ func importExecute(out io.Writer, file string) error {
 
 func importGen(out io.Writer, file string) []string {
 	var projectName string = config.ProjectConfig.ProjectName
-	var db config.DbConfig = config.GetDbConfig()
+	db, _ := config.GetDbConfig()
 	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
 
 	return []string{"docker", "exec", "-i", containerName, "bash", "-pc", db.Import}
@@ -117,7 +121,8 @@ func importGen(out io.Writer, file string) []string {
 
 func copyImportGen(out io.Writer, file string) []string {
 	var projectName string = config.ProjectConfig.ProjectName
-	var db config.DbConfig = config.GetDbConfig()
+	db, _ := config.GetDbConfig()
+
 	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
 
 	targetPath := fmt.Sprintf("%s:/tmp/%s%s", containerName, projectName, db.Filetype)
@@ -127,7 +132,7 @@ func copyImportGen(out io.Writer, file string) []string {
 
 func removeImportGen(out io.Writer) []string {
 	var projectName string = config.ProjectConfig.ProjectName
-	var db config.DbConfig = config.GetDbConfig()
+	db, _ := config.GetDbConfig()
 	containerName := projectName + "-" + config.ProjectConfig.DB.ContainerName
 
 	targetFile := fmt.Sprintf("/tmp/%s%s", projectName, db.Filetype)

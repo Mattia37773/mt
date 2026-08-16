@@ -8,6 +8,7 @@ import (
 
 	"github.com/mattia37773/mt/config"
 	"github.com/mattia37773/mt/helper/basecmd"
+	"github.com/mattia37773/mt/helper/docker"
 
 	"github.com/spf13/cobra"
 )
@@ -19,8 +20,12 @@ var shellCmd = &cobra.Command{
 	DisableFlagsInUseLine: true,
 	RunE: func(c *cobra.Command, args []string) error {
 		out := c.OutOrStdout()
+		projectName, projectNameErr := basecmd.ValidateProjectName(out)
+		if projectNameErr != nil {
+			return projectNameErr
+		}
 
-		containerErr := basecmd.CheckContainerExits(out, config.ProjectConfig.ProjectName+"-"+config.ProjectConfig.DB.ContainerName)
+		_, containerErr := docker.ContainerExits(out, projectName+"-"+config.ProjectConfig.DB.ContainerName)
 		if containerErr != nil {
 			return containerErr
 		}
@@ -40,5 +45,9 @@ func init() {
 }
 
 func shellGen(out io.Writer, args []string) ([]string, error) {
-	return basecmd.ExecuteDbCommand(out, config.GetDbConfig().Shell, args)
+	db, dbError := config.GetDbConfig()
+	if dbError != nil {
+		return []string{}, dbError
+	}
+	return basecmd.ExecuteDbCommand(out, db.Shell, args)
 }
