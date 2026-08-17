@@ -145,7 +145,7 @@ func testConsoleCommandNotFound(t *testing.T) {
 
 	assert.Error(t, errExec)
 	assert.Contains(t, errExec.Error(),
-		"The command: bin/console isn't available inside the "+config.ProjectConfig.DB.ContainerName,
+		"The command: php bin/console isn't available inside the "+config.ProjectConfig.DB.ContainerName,
 	)
 }
 

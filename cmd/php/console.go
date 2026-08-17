@@ -47,5 +47,5 @@ func init() {
 }
 
 func consoleGen(out io.Writer, args []string) ([]string, error) {
-	return basecmd.ExecuteBackendCommand(out, "bin/console", args)
+	return basecmd.ExecuteBackendCommand(out, "php bin/console", args)
 }
